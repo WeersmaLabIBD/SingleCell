@@ -1,7 +1,10 @@
 
 **blood vs mucosa differential expression analysis using SCDE on cluster**
 ====
-takes a lot of time, so performing on cluster is advised
+Author: WTC
+Date: 20171020
+
+*takes a lot of time, so performing on cluster is advised*
 
 ```
 library("methods")
