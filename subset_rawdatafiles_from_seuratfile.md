@@ -1,6 +1,9 @@
 **extract CD8 pos and neg bloodcell names from old seurat file and make new seurat file with raw data and these cells**
 ---
 
+Author: WTC
+Date: 20171020
+
 **take filtered dataset containing all cells raw data**
 ```
 datafile<-SetAllIdent(datafile, "tissue")
