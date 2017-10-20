@@ -1,6 +1,8 @@
-**script made by combining seurat pollen, seurat pbmc and own scripts, use in R**
+**Use in R**
 ====
 
+Autor: WTC
+Date: 20172010
 
 **preparing raw data per patient**
 ----
