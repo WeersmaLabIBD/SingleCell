@@ -1,9 +1,11 @@
-###########################################################################################################################
-# Authors: Werna Uniken Venema
-# Name: merge_ctl_10x_cd.R
-# Function: Compare cytotoxic cell dataset from 10X, and compare with 'own' CTLs
-###########################################################################################################################
-#
+**Compare cytotoxic cell dataset from 10X, and compare with 'own' CTLs**
+
+# Author: WTC
+# Date: 20180629
+
+# Description:
+using this script in R, one can merge two datasets from different sources (i.e. a subset of our CD dataset and a publicly available 10X genomics dataset) and explore gene expression differences between those
+
 # Libraries
 #
 ###########################################################################################################################
