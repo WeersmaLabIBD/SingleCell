@@ -1,41 +1,20 @@
-**Compare cytotoxic cell dataset from 10X, and compare with 'own' CTLs**
+**TITLE: Compare cytotoxic cell dataset from 10X, and compare with 'own' CTLs**
 
-# Author: WTC
-# Date: 20180629
+Author: WTC
+Date: 20180629
 
 # Description:
 using this script in R, one can merge two datasets from different sources (i.e. a subset of our CD dataset and a publicly available 10X genomics dataset) and explore gene expression differences between those
 
 # Libraries
-#
-###########################################################################################################################
 library(Seurat)
 library(Matrix)
 #library(Matrix.utils)
 library(ggplot2)
 #library(pryr)
 
-###########################################################################################################################
-#
-# Functions
-#
-###########################################################################################################################
 
-# Name: prepare.lane
-# Function: Process all the data from a lane and filter out the doublets found with the DeAnonymizer
-# Input:
-#   Name 	            Type          Description
-#   input.loc       	character     The directory to the lane data
-#   deAnonymizer.loc    character     Location to the deAnonymizer output for that lane
-#   lane 		  	    numeric       The lane number
-#   cdulated         	character     Either "all" if all samples are cdulated, "none" if no samples are cdulated, or a
-#									  vector with the sample IDs that are cdulated
-#   ctrlulated      	character     Either "all" if all samples are ctrlulated, "none" if no samples are ctrlulated, or a
-#									  vector with the sample IDs that are ctrlulated
-#
-# Output:
-#   A list with the data matrix, a vector with the cdulation information, the person associated to each cell, all mitochondrial 
-#   genes and the lane number
+# Functions
 
 # download Cytotoxic T cell gene/cell matrix (raw) from https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/cytotoxic_t
 CTL_10x<-Read10X(data.dir = "~/Downloads/matrices_mex/hg19/")
@@ -87,9 +66,8 @@ save(CTL_CD, file="~/Desktop/Single_cell/CTL_10x_CD/CTL_CD.Rda")
 ## Combine the cdulated and ctrlulated cells into a single object
 ctl.combined <- RunCCA(CTL_10x, CTL_CD, genes.use = intersect(rownames(CTL_10x@data), rownames(CTL_CD@data)), num.cc = 30, scale.data=T)
 
-###############################################################
+
 # Process the data after combining the two datasets
-###############################################################
 
 ctl.combined <- RunPCA(object = ctl.combined, pc.genes = ctl.combined@var.genes, do.print = TRUE, pcs.print = 1:5, genes.print = 5)
 ctl.combined = RunTSNE(ctl.combined, dims.use = 1:15, do.fast = T)
@@ -109,16 +87,14 @@ ctl.combined <- FindClusters(ctl.combined, reduction.type = "cca.aligned", resol
 
 setwd("~/Desktop/Single_cell/CTL_10x_CD/")
 save(ctl.combined, file="~/Desktop/Single_cell/CTL_10x_CD/ctl_combined_aligned.Rda")
-###############################################################
+
 # Making several tSNE plots, coloured by different meta data
-###############################################################
+
 TSNEPlot(ctl.combined, do.return = T, pt.size = 0.5, group.by = "dataset")
 TSNEPlot(ctl.combined, do.label = T, do.return = T, pt.size = 0.5)
 
-
-###############################################################
 # Make feature plots for some marker genes
-###############################################################
+
 genes.to.use <- c("MS4A1", "CD3E", "LYZ", "GNLY", "CD8A", "PF4")
 for (gene in genes.to.use){
 	cols <- colorRampPalette(c("lightgrey", "blue"))(100)
@@ -170,9 +146,9 @@ gg.color.hue <- function(n) {
   hcl(h = hues, l = 65, c = 100)[1:n]
 }
 
-###############################################################
-# Making the multi-violin plots
-###############################################################
+
+# Making the multi-violin plots, scipt from Dylan de Vries/ Harm Brugge
+
 ctl.combined<-SetAllIdent(ctl.combined, "dataset")
 identities <- ctl.combined@ident
 colors.x <- gg.color.hue(length(unique(identities)))
@@ -194,9 +170,9 @@ ggplot(plot.data, aes(factor(ident),value)) +
   scale_x_discrete(limits = rev(levels(plot.data$ident)), position = "top") +
   scale_fill_manual(values = colors.x) #+ theme_set(theme_gray(base_size = 28))
 
-###############################################################
+
 # Compare the new Seurat object with the old Seurat object
-###############################################################
+
 
 # visualize
 # add metadata own data
