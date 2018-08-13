@@ -32,6 +32,9 @@ library(tidyr)
 library(devtools)
 library(biomaRt)
 library(MAST) # for DE analyses
+library(reactome.db)
+library(clusterProfiler)
+library(ReactomePA)
 ```
 **Create new seurat (v2.0) object of raw data file + QC**
 ---
@@ -185,7 +188,7 @@ head(seurat@data)
   
 scale, regressing for nUMI and perc.mit, because these cause unwanted variation in you expression data
 ```
-seuratfile <- ScaleData(object = seuratfile, vars.to.regress = c("nUMI", "percent.mito"))
+seuratfile <- ScaleData(object = seuratfile, vars.to.regress = c("nUMI", "percent.mito")) # add "patient" or "gender" here for regression for patient or gender
 seuratfile<-FindVariableGenes(seuratfile, mean.function = ExpMean, dispersion.function = LogVMR, x.low.cutoff = 2, y.cutoff = 2)
 seuratfile <- RunPCA(object = seuratfile, pc.genes = row.names(seuratfile@data), do.print = TRUE, pcs.print = 1:5, genes.print = 5, pcs.compute = 40)
 seuratfile <- ProjectPCA(object = seuratfile, do.print = T, pcs.store = 40)
@@ -237,13 +240,31 @@ with genes >1% expressed in dataset; set 'only.pos=F' to obtain both up- and dow
 seuratfile<-SetAllIdent(seuratfile, "eight_cell_types")
 allcells_DE_markers = FindAllMarkers(seuratfile, min.pct = 0.01, only.pos = T, test.use = "MAST")
 ```
-subset CDriskgenes_DE for significant results only
+subset allcells_DE_markers for significant (p<0.05) results only
 ```
 allcells_DE_markers<-allcells_DE_markers[allcells_DE_markers$p_val_adj < 0.05,]
 ```
+make seuratfile regressed for patient or gender, see above, and calculate overlapping genes between datasets that are regressed for resp. patient and gender, and that are not regressed for these factors
+```
+seuratfile_patientregressed<-SetAllIdent(seuratfile_patientregressed, "eight_cell_types")
+allcells_patientregr_DE_markers = FindAllMarkers(seuratfile_patientregressed, min.pct = 0.01, only.pos = T, test.use = "MAST")
+row.names(allcells_patientregr_DE_markers)<-NULL
+allcells_patientregr_DE_markers<-allcells_patientregr_DE_markers[allcells_patientregr_DE_markers$p_val_adj < 0.05,]
+dim(allcells_patientregr_DE_markers)
+colnames(allcells_patientregr_DE_markers)[1]<-"p_val_patientregr"
+colnames(allcells_patientregr_DE_markers)[2]<-"Av_logFC_patientregr"
+colnames(allcells_patientregr_DE_markers)[3]<-"pct.1_patientregr"
+colnames(allcells_patientregr_DE_markers)[4]<-"pct.2_patientregr"
+colnames(allcells_patientregr_DE_markers)[5]<-"p_val_adj_patientregr"
+colnames(allcells_patientregr_DE_markers)[6]<-"cluster_patientregr"
+allcells_patientregr_DE_markers$gene_cluster<-paste0(allcells_patientregr_DE_markers$gene, sep="_", allcells_patientregr_DE_markers$cluster_patientregr)
+allcells_DE_markers$gene_cluster<-paste0(allcells_DE_markers$gene, sep="_", allcells_DE_markers$cluster)
+overlap_patient_w_o_regress<-merge(allcells_patientregr_DE_markers, allcells_DE_markers, by="gene_cluster", all=F)
+percentage_overlapping_DE_genes<-nrow(overlap_patient_w_o_regress)/nrow(allcells_DE_markers)
+```
 **CD risk gene analysis**
   
-load genes of interest file
+load genes of interest file, as in supplementary data
 ```
 CDriskgenes<-read.csv("~/...txt")
 ```
@@ -253,7 +274,7 @@ CDriskgenes_DE<-merge(CDriskgenes, allcells_DE_markers, by="gene", all=FALSE)
 ```
 **IBD Drugtarget analysis**
   
-load genes of interest file
+load genes of interest file, as extracted from opentargets.org - IBD drugtargets
 ```
 DRUGTARGETGENES<-read.csv("~/...txt")
 ```
@@ -261,3 +282,44 @@ match DE list and DRUGTARGETGENES
 ```
 DRUGTARGETGENES_DE<-merge(DRUGTARGETGENES, allcells_DE_markers, by="gene", all=FALSE)
 ```
+**Pathway analyses using ReactomeDB**
+---
+for example for CTL_blood genes
+```
+CTL_Blood_genes<-subset(allcells_DE_markers, (allcells_DE_markers$cluster == "CTL_Blood")) 
+CTL_Blood_genes<-CTL_Blood_genes$gene
+```
+convert gene symbols to entrez-id for Reactome
+```
+CTL_Blood_genes = bitr(CTL_Blood_genes, fromType="SYMBOL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+```
+take only Entrez-id column in list
+```
+CTL_Blood_entrez <- CTL_Blood_genes$ENTREZID
+```
+do pathway analysis
+```
+CTL_Blood_pathways <- enrichPathway(gene=CTL_Blood_entrez,pvalueCutoff=0.05, readable=T)
+```
+barplot pathways
+```
+barplot(CTL_Blood_pathways, showCategory=15)
+```
+dotplot enrichment
+```
+dotplot(CTL_Blood_pathways, showCategory=15)
+```
+**Plotting**
+---
+**Celltypes in all cells**
+```
+allcells_meta<-SetAllIdent(seuratfile_allcells_patientregr, "eight_cell_types")
+current.cluster.ids <- c("Cytotoxic_Blood", "Cytotoxic_mucosa", "Quiescent_Blood", "REG1A_REG1B_mucosa","Th17_mucosa", "Treg/EMC_Blood", "Treg/Quiescent_Blood", "Treg/Quiescent_mucosa")
+new.cluster.ids <- c("CTL blood", "CTL mucosa", "Quiescent blood","REG1A/1B mucosa", "Th17 mucosa", "Effector/Treg blood", "Treg/Quiescent blood", "Treg/Quiescent mucosa")
+x<-allcells_meta
+x<-SetAllIdent(x, "eight_cell_types")
+Dutch<-c("m", "v")
+English<-c("Male", "Female")
+x@ident <- plyr::mapvalues(x = x@ident, from = current.cluster.ids, to = new.cluster.ids)
+x@meta.data$gender <- plyr::mapvalues(x = x@meta.data$gender, from = Dutch, to = English)
+TSNEPlot(x, pt.size=2, colors.use =c("red", "orange", "yellow2", "magenta", "green2", "cyan2", "blue", "purple"), pt.shape="gender")
