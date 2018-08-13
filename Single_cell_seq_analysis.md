@@ -108,7 +108,6 @@ seuratfile <- FilterCells(object = seuratfile, subset.names = c("nGene", "percen
 seuratfile <- NormalizeData(object = seuratfile, normalization.method = "LogNormalize", scale.factor = 10000)
 ```
 **Add metadata**
----
 ```
 metadata<-read.csv("..")
 ```
@@ -164,7 +163,6 @@ file_per_patient <- AddMetaData(seuratfile, CellsMetaTrim)
 head(seuratfile@meta.data)
 ```
 **If necessary: change rownames from ensembl gene names to gene symbols**
------
 ```
 CellsMeta = seuratfile@data
 head(CellsMeta)
@@ -181,6 +179,8 @@ head(CellsMeta)
 seuratfile@data = CellsMeta
 head(seurat@data)
 ```
+**CLustering and cell types**
+---
 **Scale, perform PCAs and JackStraw analysis to define significance of PCAs**
   
 scale, regressing for nUMI and perc.mit, because these cause unwanted variation in you expression data
@@ -229,9 +229,10 @@ Cluster with epitopic CD8+ cells and epitopic CD8- cells separately, and cluster
   
 Add consensus cell type names to metadata (see above)
   
-**DE analysis with genes >1% expressed in dataset, using MAST**
-  
-set 'only.pos=F' to obtain both up- and downregulated genes
+    
+**DE analysis using MAST**
+---
+with genes >1% expressed in dataset; set 'only.pos=F' to obtain both up- and downregulated genes
 ```
 seuratfile<-SetAllIdent(seuratfile, "eight_cell_types")
 allcells_DE_markers = FindAllMarkers(seuratfile, min.pct = 0.01, only.pos = T, test.use = "MAST")
