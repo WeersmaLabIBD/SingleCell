@@ -2,7 +2,6 @@
 =====
 author: WTC
 date: 20171020
-```
 Load libraries
 ----
 ```
@@ -53,6 +52,7 @@ dim(no_collagen)
 ```
 extract interesting cell subsets
 ```
+bloodcells<-metadata[metadata$tissue == "Blood",]
 ielcells<-metadata[metadata$tissue == "IEL",]
 lplcells<-metadata[metadata$tissue == "LPL",]
 mucosacells<-rbind(lplcells, ielcells)
@@ -162,7 +162,7 @@ head(CellsMetaTrim)
 file_per_patient <- AddMetaData(seuratfile, CellsMetaTrim)
 head(seuratfile@meta.data)
 ```
-**change rownames from ensembl gene names to gene symbols**
+**if necessary: change rownames from ensembl gene names to gene symbols**
 -----
 ```
 CellsMeta = seuratfile@data
@@ -223,61 +223,33 @@ by 'patient', or other variable from meta.data
 ```
 TSNEPlot(object =seuratfile, group.by="patient")
 ```
-**subset cluster of cells**
----
-Subset cells with certain identity, for example cluster 0, or all cells from a certain tissue
+**DE analysis with genes >1% expressed in dataset, using MAST**
+set 'only.pos=F' to obtain both up- and downregulated genes
 ```
-cluster0<-SubsetData(seuratfile, ident=0)
+seuratfile<-SetAllIdent(seuratfile, "eight_cell_types")
+allcells_DE_markers = FindAllMarkers(seuratfile, min.pct = 0.01, only.pos = T, test.use = "MAST")
 ```
-**DE with genes >1%, MAST**
+subset CDriskgenes_DE for significant results only
 ```
-seuratfile_pt1cells<-SetAllIdent(seuratfile_pt1cells, "eight_cell_types")
-pt1cells_DE_markers = FindAllMarkers(seuratfile_pt1cells, min.pct = 0.01, only.pos = T, test.use = "MAST")
+allcells_DE_markers<-allcells_DE_markers[allcells_DE_markers$p_val_adj < 0.05,]
+```
+**CD risk gene analysis**
 
-
-**After SCDE analysis: extract CD risk genes from DE genes table**
----
-
-**open DE .txt file**
-```
-DE_mucosa_CD4_CD8<-read.table("..")
-```
-**create column 'Gene'**
-```
-DE_mucosa_CD4_CD8$Gene<-sapply(strsplit(row.names(DE_mucosa_CD4_CD8), split='-', fixed=TRUE), function(x) (x[2]))
-```
 load genes of interest file
 ```
-GOI<-read.table("..", sep=";", header=TRUE)
+CDriskgenes<-read.csv("~/...txt")
 ```
-match DE list and GOI
+obtain DE CDriskgenes
 ```
-GOI_pos<-merge(GOI, DE_mucosa_CD4_CD8, by="Gene", all=FALSE)
+CDriskgenes_DE<-merge(CDriskgenes, allcells_DE_markers, by="gene", all=FALSE)
 ```
-subset DE_mucosa_CD4_CD8 with only genes above DE value for two-sided testing (<-1.96 and >1.96)
-```
-GOI_DE_CD4pos<-subset(GOI_pos, cZ>1.96)
-write.csv(GOI_DE_CD4pos, "..")
-GOI_DE_CD8pos<-subset(GOI_pos, cZ<(-1.96))
-write.csv(GOI_DE_CD8pos, "..")
-```
+**IBD Drugtarget analysis**
+
 load genes of interest file
 ```
-DRUGTARGETGENES<-read.table("..", sep=";", header=TRUE)
+DRUGTARGETGENES<-read.csv("~/...txt")
 ```
 match DE list and DRUGTARGETGENES
 ```
-DRUGTARGETGENES_pos<-merge(DRUGTARGETGENES, DE_blood_CD4_CD8, by="Gene", all=FALSE)
-```
-save matched list
-```
-write.csv(DRUGTARGETGENES_pos, "..")
-```
-
-subset DE_mucosa_CD4_CD8 with only genes above DE value for two-sided testing (<-1.96 and >1.96)
-```
-DRUGTARGETGENES_CD4pos<-subset(DRUGTARGETGENES_pos, cZ>1.95)
-write.csv(DRUGTARGETGENES_CD4pos, "..")
-DRUGTARGETGENES_CD8pos<-subset(DRUGTARGETGENES_pos, cZ<(-1.95))
-write.csv(DRUGTARGETGENES_CD8pos, "..")
+DRUGTARGETGENES_DE<-merge(DRUGTARGETGENES, allcells_DE_markers, by="gene", all=FALSE)
 ```
