@@ -182,7 +182,7 @@ seuratfile@data = CellsMeta
 head(seurat@data)
 ```
 **Scale, perform PCAs and JackStraw analysis to define significance of PCAs**
----
+  
 scale, regressing for nUMI and perc.mit, because these cause unwanted variation in you expression data
 ```
 seuratfile <- ScaleData(object = seuratfile, vars.to.regress = c("nUMI", "percent.mito"))
@@ -203,7 +203,7 @@ in the kink in the plot, the expected significance cutoff of the  PCAs lies:
 PCElbowPlot(object = seuratfile)
 ```
 **Find clusters**
----
+  
 using relevant PCAs, adapt resolution to amount of clusters that is wishful/makes sense
 ```
 seuratfile <- FindClusters(object = seuratfile, reduction.type = "pca", dims.use = 1:18, resolution = 0.6, print.output = 0, save.SNN = TRUE)
@@ -215,7 +215,6 @@ PCHeatmap(object = seuratfile, pc.use = 6, cells.use = 500, do.balanced = TRUE,l
 PCHeatmap(object = seuratfile, pc.use = 1:6, cells.use = 500, do.balanced = TRUE, label.columns = FALSE, use.full = FALSE)
 ```
 **Run TSNE and visualize**
----
 ```
 seuratfile <- RunTSNE(object = seuratfile, dims.use = 1:18, do.fast = TRUE)
 TSNEPlot(object = seuratfile)
@@ -224,11 +223,14 @@ by 'patient', or other variable from meta.data
 ```
 TSNEPlot(object =seuratfile, group.by="patient")
 ```
-**Define cell types** . 
-  Cluster with epitopic CD8+ cells and epitopic CD8- cells separately, and cluster with tissue of origin. Assign cell types to clusters based on cell type marker genes known from literature. Make consensus clustering of epitopic marker clustering and tissue of origin clustering per cell.  
-Add consensus cell type names to metadata (see above) . 
+**Define cell types**
+  
+Cluster with epitopic CD8+ cells and epitopic CD8- cells separately, and cluster with tissue of origin. Assign cell types to clusters based on cell type marker genes known from literature. Make consensus clustering of epitopic marker clustering and tissue of origin clustering per cell.
+  
+Add consensus cell type names to metadata (see above)
+  
 **DE analysis with genes >1% expressed in dataset, using MAST**
--
+  
 set 'only.pos=F' to obtain both up- and downregulated genes
 ```
 seuratfile<-SetAllIdent(seuratfile, "eight_cell_types")
@@ -239,7 +241,7 @@ subset CDriskgenes_DE for significant results only
 allcells_DE_markers<-allcells_DE_markers[allcells_DE_markers$p_val_adj < 0.05,]
 ```
 **CD risk gene analysis**
--
+  
 load genes of interest file
 ```
 CDriskgenes<-read.csv("~/...txt")
@@ -249,7 +251,7 @@ obtain DE CDriskgenes
 CDriskgenes_DE<-merge(CDriskgenes, allcells_DE_markers, by="gene", all=FALSE)
 ```
 **IBD Drugtarget analysis**
-
+  
 load genes of interest file
 ```
 DRUGTARGETGENES<-read.csv("~/...txt")
