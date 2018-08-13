@@ -179,7 +179,7 @@ head(CellsMeta)
 seuratfile@data = CellsMeta
 head(seurat@data)
 ```
-**CLustering and cell types**
+**Clustering and cell types**
 ---
 **Scale, perform PCAs and JackStraw analysis to define significance of PCAs**
   
