@@ -1,8 +1,8 @@
 **Seurat single cell seq analysis**
 =====
-author: WTC
+Author: WTC
 -
-date: 20180813
+Date: 20180813
 -
 Load libraries
 ----
@@ -34,7 +34,7 @@ library(devtools)
 library(biomaRt)
 library(MAST) # for DE analyses
 ```
-**create new seurat (v2.0) object of raw data file + QC**
+**Create new seurat (v2.0) object of raw data file + QC**
 ---
 load data and metadata
 ```
@@ -86,11 +86,11 @@ bloodcells<-as.vector(bloodcells$sample)
 create separate dataframes for these subsets, using them as a raw.data input in the CreateSeuratObject function
 ```
 ```
-**create seuratobject and filter for genes expressed in =>3 cells**
+**Create seuratobject and filter for genes expressed in =>3 cells**
 ```
 seuratfile <- CreateSeuratObject(raw.data = data, min.cells = 3, project = "CD")
 ```
-**calculate % mitochondrial genes (high percentage of total expressed genes can mark cell breakdown), number of UMI and number of genes**
+**Calculate % mitochondrial genes (high percentage of total expressed genes can mark cell breakdown), number of UMI and number of genes**
 ```
 mito.genes <- grep(pattern = "^MT\\.", x = rownames(x = seuratfile@data), value = TRUE)
 percent.mito <- Matrix::colSums(seuratfile@raw.data[mito.genes, ])/Matrix::colSums(seuratfile@raw.data)
@@ -100,15 +100,15 @@ par(mfrow = c(1, 2))
 GenePlot(object = datafile, gene1 = "nUMI", gene2 = "percent.mito")
 GenePlot(object = datafile, gene1 = "nUMI", gene2 = "nGene")
 ```
-**filter for cells with =>200 AND =<2500 genes per cell, and <5% mitochondrial genes**
+**Filter for cells with =>200 AND =<2500 genes per cell, and <5% mitochondrial genes**
 ```
 seuratfile <- FilterCells(object = seuratfile, subset.names = c("nGene", "percent.mito"), low.thresholds = c(200, -Inf), high.thresholds = c(2500, 0.05))
 ```
-**log normalize**
+**Log normalize**
 ```
 seuratfile <- NormalizeData(object = seuratfile, normalization.method = "LogNormalize", scale.factor = 10000)
 ```
-**add metadata**
+**Add metadata**
 ---
 ```
 metadata<-read.csv("..")
@@ -148,7 +148,7 @@ add the new metadatafile to your Seurat file
 ```
 datafile <- AddMetaData(datafile, CellsMeta)
 ```
-**add patient**
+**Add patient**
 ```
 CellsMeta = seuratfile@meta.data
 head(CellsMeta)
@@ -164,7 +164,7 @@ head(CellsMetaTrim)
 file_per_patient <- AddMetaData(seuratfile, CellsMetaTrim)
 head(seuratfile@meta.data)
 ```
-**if necessary: change rownames from ensembl gene names to gene symbols**
+**If necessary: change rownames from ensembl gene names to gene symbols**
 -----
 ```
 CellsMeta = seuratfile@data
@@ -182,7 +182,7 @@ head(CellsMeta)
 seuratfile@data = CellsMeta
 head(seurat@data)
 ```
-**scale, perform PCAs and JackStraw analysis to define significance of PCAs**
+**Scale, perform PCAs and JackStraw analysis to define significance of PCAs**
 ---
 scale, regressing for nUMI and perc.mit, because these cause unwanted variation in you expression data
 ```
@@ -215,7 +215,7 @@ explore gene expression in PCAs
 PCHeatmap(object = seuratfile, pc.use = 6, cells.use = 500, do.balanced = TRUE,label.columns = FALSE)
 PCHeatmap(object = seuratfile, pc.use = 1:6, cells.use = 500, do.balanced = TRUE, label.columns = FALSE, use.full = FALSE)
 ```
-**run TSNE and visualize**
+**Run TSNE and visualize**
 ---
 ```
 seuratfile <- RunTSNE(object = seuratfile, dims.use = 1:18, do.fast = TRUE)
@@ -225,7 +225,11 @@ by 'patient', or other variable from meta.data
 ```
 TSNEPlot(object =seuratfile, group.by="patient")
 ```
+**Define cell types** . 
+Cluster with epitopic CD8+ cells and epitopic CD8- cells separately, and cluster with tissue of origin. Assign cell types to clusters based on cell type marker genes known from literature. Make consensus clustering of epitopic marker clustering and tissue of origin clustering per cell.  
+Add consensus cell type names to metadata (see above) . 
 **DE analysis with genes >1% expressed in dataset, using MAST**
+-
 set 'only.pos=F' to obtain both up- and downregulated genes
 ```
 seuratfile<-SetAllIdent(seuratfile, "eight_cell_types")
@@ -236,7 +240,7 @@ subset CDriskgenes_DE for significant results only
 allcells_DE_markers<-allcells_DE_markers[allcells_DE_markers$p_val_adj < 0.05,]
 ```
 **CD risk gene analysis**
-
+-
 load genes of interest file
 ```
 CDriskgenes<-read.csv("~/...txt")
