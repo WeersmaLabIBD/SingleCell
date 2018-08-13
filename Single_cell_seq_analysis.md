@@ -1,7 +1,9 @@
 **Seurat single cell seq analysis**
 =====
 author: WTC
+---
 date: 20171020
+---
 Load libraries
 ----
 ```
