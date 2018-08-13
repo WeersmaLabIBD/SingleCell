@@ -1,9 +1,8 @@
 **Seurat single cell seq analysis**
 =====
-Author: WTC
--
-Date: 20180813
--
+Author: WTC . 
+Date: 20180813 . 
+  
 Load libraries
 ----
 ```
@@ -226,7 +225,7 @@ by 'patient', or other variable from meta.data
 TSNEPlot(object =seuratfile, group.by="patient")
 ```
 **Define cell types** . 
-Cluster with epitopic CD8+ cells and epitopic CD8- cells separately, and cluster with tissue of origin. Assign cell types to clusters based on cell type marker genes known from literature. Make consensus clustering of epitopic marker clustering and tissue of origin clustering per cell.  
+  Cluster with epitopic CD8+ cells and epitopic CD8- cells separately, and cluster with tissue of origin. Assign cell types to clusters based on cell type marker genes known from literature. Make consensus clustering of epitopic marker clustering and tissue of origin clustering per cell.  
 Add consensus cell type names to metadata (see above) . 
 **DE analysis with genes >1% expressed in dataset, using MAST**
 -
