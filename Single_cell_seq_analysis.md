@@ -309,6 +309,13 @@ dotplot enrichment
 ```
 dotplot(CTL_Blood_pathways, showCategory=15)
 ```
+**Comparison with previously published DE results**
+---
+create a df "genes_24799394", consisting of the DE genes between blood and IEL+LPL from PMID 24799394 in R, with column name "gene" and merge with DE genes between blood and mucosa (supplemental figure 3)
+```
+overlap_24799394<-merge(genes_24799394, allcells_DE_markers, by="gene", all=F)
+number_overlapping_genes_previously_published<-nrow(overlap_24799394)
+```
 **Plotting**
 ---
 **Celltypes in all cells**
@@ -323,3 +330,4 @@ English<-c("Male", "Female")
 x@ident <- plyr::mapvalues(x = x@ident, from = current.cluster.ids, to = new.cluster.ids)
 x@meta.data$gender <- plyr::mapvalues(x = x@meta.data$gender, from = Dutch, to = English)
 TSNEPlot(x, pt.size=2, colors.use =c("red", "orange", "yellow2", "magenta", "green2", "cyan2", "blue", "purple"), pt.shape="gender")
+
