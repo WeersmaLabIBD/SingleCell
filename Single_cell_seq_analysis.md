@@ -283,7 +283,7 @@ create a df "genes_24799394", consisting of the DE genes between blood and IEL+L
 overlap_24799394<-merge(genes_24799394, allcells_DE_markers, by="gene", all=F)
 number_overlapping_genes_previously_published<-nrow(overlap_24799394)
 ```
-**Comparison with healthy dataset**
+**Comparison with healthy CTL dataset**
 ---
 download Cytotoxic T cell gene/cell matrix (raw) from https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/cytotoxic_t
 ```
@@ -418,9 +418,84 @@ mean(number_DE_genes$number_DEgenes)
 same for subset10x
 ```
 ```
+**Permutations for numer of risk genes found in DE genes**
+```
+genes_cd_10x<-genes_use # all genes present in at least 1% of CTL and 1% of CD samples
+a<-"number"
+results_permutation<-data.frame(a)
+for(i in 1:100000){
+  samp_row_idxs  <- sample(nrow(genes_cd_10x), mean(number_DE_genes$number_DEgenes))
+  samp_gene_names <- as.data.frame(genes_cd_10x[samp_row_idxs,])
+  colnames(samp_gene_names)[1]<-"gene"
+  risk_genes_sample<- merge(samp_gene_names, riskgenes, by="gene", all=F)
+  results_permutation[i,a]<-nrow(risk_genes_sample)}
+```
+and test whether it is higher than observed (mean(number_DE_riskgenes$number_DEriskgenes))
+```
+permutation_higher<-results_permutation[results_permutation$number > mean(number_DE_riskgenes$number_DEriskgenes),]
+pval_10x_versus_cd=(nrow(permutation_higher))/100000 # pval= (# of obs > our mean value) / # of bootstraps
+```
+**Comparison with healthy naive CD4+ T cell dataset**
+---
+download Naive CD4-positive T cell gene/cell matrix (raw) from https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/naive_t
+create new seurat (v2.0) object of raw data files
+```
+seuratfile <- CreateSeuratObject(raw.data = naive_cd4T_10x, min.cells = 3, project = "x")
+```
+filter and lognormalize
+```
+mito.genes <- grep(pattern = "^MT\\.", x = rownames(x = seuratfile@data), value = TRUE)
+percent.mito <- Matrix::colSums(seuratfile@raw.data[mito.genes, ])/Matrix::colSums(seuratfile@raw.data)
+seuratfile <- AddMetaData(object = seuratfile, metadata = percent.mito, col.name = "percent.mito")
+VlnPlot(object = seuratfile, features.plot = c("nGene", "nUMI", "percent.mito"), nCol = 3)
+par(mfrow = c(1, 2))
+GenePlot(object = seuratfile, gene1 = "nUMI", gene2 = "percent.mito")
+GenePlot(object = seuratfile, gene1 = "nUMI", gene2 = "nGene")
+seuratfile <- FilterCells(object = seuratfile, subset.names = c("nGene", "percent.mito"), low.thresholds = c(200, -Inf), high.thresholds = c(2500, 0.05))
+seuratfile <- NormalizeData(object = seuratfile, normalization.method = "LogNormalize", scale.factor = 10000)
+```
+change synonymous gene name 'MAL' to 'CD8A'
+```
+seuratfile@meta.data$ident<-"Naive CD4T"
+seuratfile<-SetAllIdent(seuratfile, "ident")
+x<-seuratfile
+MAL<-"MAL"
+CD8A<-"CD8A"
+row.names(x@data) <- plyr::mapvalues(x = row.names(x@data), from = MAL, to = CD8A)
+```
+plot expression of CD8A (also known as MAL), CD8B, CD4
+```
+VlnPlot(x, c("CD8A","CD8B", "CD4"))
+```
+plot expression of CD8A (also known as MAL), CD8B, CD4 on epitopic CD8-positive and -negative sets of CD patients. Seuratfile for epitopic CD8-positive of -negative cells only can be made following the script above 'Create new seurat (v2.0) object of raw data file + QC'
+```
+VlnPlot(seuratfile_cd8poscells, c("CD8A","CD8B", "CD4"))
+VlnPlot(seuratfile_cd8negcells, c("CD8A","CD8B", "CD4"))
+```
 **Plotting**
 ---
-**Celltypes in all tissues**
+tSNEL PBL, IEL, LPL
+```
+allcells_meta<-SetAllIdent(seuratfile_allcells_patientregr, "tissue")
+TSNEPlot(allcells_meta, pt.size=2, colors.use =c("brightred", "brightblue", "darkgreen"))
+```
+tSNE mucosacells
+```
+seuratfile_mucosacells<-SetAllIdent(seuratfile_mucosacells, "eight_cell_types")
+current.cluster.ids <- c("Cytotoxic_Blood", "Cytotoxic_mucosa", "Quiescent_Blood", "REG1A_REG1B_mucosa","Th17_mucosa", "Treg/EMC_Blood", "Treg/Quiescent_Blood", "Treg/Quiescent_mucosa")
+new.cluster.ids <- c("CTL blood", "CTL mucosa", "Quiescent blood","REG1A/1B mucosa", "Th17 mucosa", "Effector/Treg blood", "Treg/Quiescent blood", "Treg/Quiescent mucosa")
+seuratfile_mucosacells@ident <- plyr::mapvalues(x = seuratfile_mucosacells@ident, from = current.cluster.ids, to = new.cluster.ids)
+TSNEPlot(seuratfile_mucosacells, pt.shape="tissue", pt.size=3, colors.use = c("orange", "magenta","green2", "purple"))
+```
+tSNE bloodcells, regressed for 'patient'
+```
+seuratfile_bloodcells<-SetAllIdent(seuratfile_bloodcells, "eight_cell_types")
+current.cluster.ids <- c("Cytotoxic_Blood", "Cytotoxic_mucosa", "Quiescent_Blood", "REG1A_REG1B_mucosa","Th17_mucosa", "Treg/EMC_Blood", "Treg/Quiescent_Blood", "Treg/Quiescent_mucosa")
+new.cluster.ids <- c("CTL blood", "CTL mucosa", "Quiescent blood","REG1A/1B mucosa", "Th17 mucosa", "Effector/Treg blood", "Treg/Quiescent blood", "Treg/Quiescent mucosa")
+seuratfile_bloodcells@ident <- plyr::mapvalues(x = seuratfile_bloodcells@ident, from = current.cluster.ids, to = new.cluster.ids)
+TSNEPlot(seuratfile_bloodcells, pt.size=3, colors.use = c("red", "yellow2", "cyan2", "blue" ) )
+```
+tSNE celltypes in all tissues
 ```
 allcells_meta<-SetAllIdent(seuratfile_allcells_patientregr, "eight_cell_types")
 current.cluster.ids <- c("Cytotoxic_Blood", "Cytotoxic_mucosa", "Quiescent_Blood", "REG1A_REG1B_mucosa","Th17_mucosa", "Treg/EMC_Blood", "Treg/Quiescent_Blood", "Treg/Quiescent_mucosa")
@@ -432,4 +507,54 @@ English<-c("Male", "Female")
 x@ident <- plyr::mapvalues(x = x@ident, from = current.cluster.ids, to = new.cluster.ids)
 x@meta.data$gender <- plyr::mapvalues(x = x@meta.data$gender, from = Dutch, to = English)
 TSNEPlot(x, pt.size=2, colors.use =c("red", "orange", "yellow2", "magenta", "green2", "cyan2", "blue", "purple"), pt.shape="gender")
+```
+make plots with various cell type markers
+```
+LIST<-c("CD62L", "CD8ab", "CD45RO")
+for(i in LIST){
+  FeaturePlot(seuratfile_bloodcells, c(i), cols.use = c( "lightgrey", "royalblue"),pt.size = 1, max.cutoff = "q75",no.legend = T, no.axes = T)
+  dev.copy(pdf,width=3, height=2.5,paste0("Bloodcells_", i, ".pdf"))
+  dev.off()
+}
 
+for(i in LIST){
+  FeaturePlot(seuratfile_mucosacells, c(i), cols.use = c( "lightgrey", "royalblue"),pt.size = 1, max.cutoff = "q75",no.legend = T, no.axes = T)
+  dev.copy(pdf,width=3, height=2.5,paste0("Mucosacells_", i, ".pdf"))
+  dev.off()
+}
+
+LIST<-c("IL17A", "IL22" ,"IRF4", "NR4A2", "CREM", "TNFRSF4","FOXP3",  "NOG", "SELL","REG1A", "REG1B", "EPCAM","CD3E", "CD3G","CCR7","CD160", "GNLY", "GZMH", "GZMB","CCL4", "CCL5", "FASLG" )
+for(i in LIST){
+  FeaturePlot(seuratfile_mucosacells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
+  dev.copy(pdf,width=3, height=2.5,paste0("Mucosacells_", i, ".pdf"))
+  dev.off()
+}
+
+LIST<-c("CCR7","CD160", "GNLY", "GZMH", "GZMB", "CCL4", "CCL5", "FASLG", "ITGAE", "IL32", "PRDM1", "TRPS1", "TNFRSF4", "CMTM6", "LTB", "MTA2", "TOX2", "IL6ST", "LEF1", "TCF7" )
+for(i in LIST){
+  FeaturePlot(seuratfile_mucosacells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
+  dev.copy(pdf,width=3, height=2.5,paste0("Bloodcells_", i, ".pdf"))
+  dev.off()
+}
+
+# CLASSIC CTL markers
+LIST<-c("PRF1","EOMES", "TBX21", "IFNG", "TNF")
+for(i in LIST){
+  FeaturePlot(seuratfile_mucosacells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
+  dev.copy(pdf,width=3, height=2.5,paste0("Bloodcells_", i, ".pdf"))
+  dev.off()
+}
+
+LIST<-c("EGF")
+for(i in LIST){
+  FeaturePlot(seuratfile_mucosacells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
+  dev.copy(pdf,width=3, height=2.5,paste0("Mucosacells_", i, ".pdf"))
+  dev.off()
+}
+
+LIST<-c("XCL2")
+for(i in LIST){
+  FeaturePlot(seuratfile_bloodcells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
+  dev.copy(pdf,width=3, height=2.5,paste0("Bloodcells_", i, ".pdf"))
+  dev.off()
+}
