@@ -523,36 +523,14 @@ for(i in LIST){
   dev.off()
 }
 
-LIST<-c("IL17A", "IL22" ,"IRF4", "NR4A2", "CREM", "TNFRSF4","FOXP3",  "NOG", "SELL","REG1A", "REG1B", "EPCAM","CD3E", "CD3G","CCR7","CD160", "GNLY", "GZMH", "GZMB","CCL4", "CCL5", "FASLG" )
+LIST<-c("CD160", "XCL2", "XCL1", "ITGA1", "FASLG", "CCL5", "IL17A", "IL22" ,"IRF4", "NR4A2", "CREM", "TNFRSF4","FOXP3",  "NOG","CCR7", "SELL","IL6ST", "REG1A", "REG1B", "EPCAM","CD3G","EGF", "LYZ" )
 for(i in LIST){
   FeaturePlot(seuratfile_mucosacells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
   dev.copy(pdf,width=3, height=2.5,paste0("Mucosacells_", i, ".pdf"))
   dev.off()
 }
 
-LIST<-c("CCR7","CD160", "GNLY", "GZMH", "GZMB", "CCL4", "CCL5", "FASLG", "ITGAE", "IL32", "PRDM1", "TRPS1", "TNFRSF4", "CMTM6", "LTB", "MTA2", "TOX2", "IL6ST", "LEF1", "TCF7" )
-for(i in LIST){
-  FeaturePlot(seuratfile_mucosacells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
-  dev.copy(pdf,width=3, height=2.5,paste0("Bloodcells_", i, ".pdf"))
-  dev.off()
-}
-
-# CLASSIC CTL markers
-LIST<-c("PRF1","EOMES", "TBX21", "IFNG", "TNF")
-for(i in LIST){
-  FeaturePlot(seuratfile_mucosacells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
-  dev.copy(pdf,width=3, height=2.5,paste0("Bloodcells_", i, ".pdf"))
-  dev.off()
-}
-
-LIST<-c("EGF")
-for(i in LIST){
-  FeaturePlot(seuratfile_mucosacells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
-  dev.copy(pdf,width=3, height=2.5,paste0("Mucosacells_", i, ".pdf"))
-  dev.off()
-}
-
-LIST<-c("XCL2")
+LIST<-c("CCR7","CD160", "GNLY", "GZMH", "GZMB", "CCL4", "CCL5", "TBX21", "ITGAE", "IL32", "PRDM1", "CMTM6", "LTB", "MTA2","HNRNPH1", "TNFRSF4", "IL6ST", "LEF1", "TCF7",  "NOG")
 for(i in LIST){
   FeaturePlot(seuratfile_bloodcells, c(i), cols.use = c( "lightgrey", "red"),pt.size = 1, max.cutoff = "q75",no.legend = F, no.axes = T)
   dev.copy(pdf,width=3, height=2.5,paste0("Bloodcells_", i, ".pdf"))
