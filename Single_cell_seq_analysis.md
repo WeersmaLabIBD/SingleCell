@@ -358,7 +358,7 @@ write output file with numbers DE genes and numbers risk genes
 write.csv(number_DE_genes, "number_DE_genes_cd_vs_10xsubsets.csv")
 write.csv(number_DE_riskgenes, "number_DE_riskgenes_cd_vs_10xsubsets_newriskgenes.csv")
 ```
-extract and count which genes are upregulated in CD (on cluster)
+extract and count which genes are upregulated in CD 
 ```
 for (n in 1:1000){
   cat("iteration", n, "\n")
