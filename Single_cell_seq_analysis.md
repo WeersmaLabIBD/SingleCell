@@ -295,7 +295,10 @@ load 179 risk genes and all genes present in 1% of both healthy and CD CTL cells
 risk_use<-read.csv("...csv")
 genes_use<-read.csv("..csv")
 ```
-select 1000x a subset of 251 cells, combine datasets using CCA and perform DE analyses on combined datasets
+**Select 1000x a subset of 251 cells, combine datasets using CCA and perform DE analyses on combined datasets**
+```
+```
+subsetting
 ```
 a<-"number_DEgenes"
 b<-"number_DEriskgenes"
@@ -311,48 +314,52 @@ CTL_10x_subset<-CreateSeuratObject(raw.data = CTL_10x_subset, min.cells = 3, pro
 mito.genes <- grep(pattern = "^MT-", x = rownames(x = CTL_10x_subset@data), value = TRUE)
 percent.mito <- Matrix::colSums(CTL_10x_subset@raw.data[mito.genes, ])/Matrix::colSums(CTL_10x_subset@raw.data)
 CTL_10x_subset <- AddMetaData(object = CTL_10x_subset, metadata = percent.mito, col.name = "percent.mito")
-
-# for ngene: 200-2500, percent mito: <5%
+```
+filter for ngene: 200-2500, percent mito: <5%
+```
 CTL_10x_subset <- FilterCells(object = CTL_10x_subset, subset.names = c("nGene", "percent.mito"), low.thresholds = c(200, -Inf), high.thresholds = c(2500, 0.05))
 
-# log normalize
+```
+log normalize
+```
 CTL_10x_subset <- NormalizeData(object = CTL_10x_subset, normalization.method = "LogNormalize", scale.factor = 10000)
 CTL_10x_subset <- ScaleData(object = CTL_10x_subset, vars.to.regress = c("nUMI", "percent.mito"))
 CTL_10x_subset@meta.data$dataset <- "subset10x"
 
 save(CTL_10x_subset, file=paste0("CTL_10x_subset",i,".Rda"))
-
-## assign name to CD dataset
+```
+assign name to CD dataset
+```
 CTL_CD@meta.data$dataset <- "cd"
-
-## Combine the cdulated and ctrlulated cells into a single object
+```
+Combine the CD and subset10x cells into a single object using CCA
+```
 CTL_subset.combined <- RunCCA(CTL_10x_subset, CTL_CD, genes.use = intersect(rownames(CTL_10x_subset@data), rownames(CTL_CD@data)), num.cc = 30, scale.data=T)
-
-###############################################################
-# Process the data after combining the two datasets
-###############################################################
+```
+calculate DE with genes present in the two datasets, in >1%, MAST, between CD  and subset10x cells
+```
 CTL_subset.combined<-SetAllIdent(CTL_subset.combined, "dataset")
-subset10x_cells<-WhichCells(CTL_subset.combined, "subset10x")
-cd_cells<-WhichCells(CTL_subset.combined, "cd")
-
-# calculate DE
-# DE with genes present in the two datasets, in >1%, MAST
 CTL_subset.combined_DE_markers_1perc = FindAllMarkers(CTL_subset.combined, only.pos = T, test.use = "MAST", genes.use = genes_use$gene)
 write.table(CTL_subset.combined_DE_markers_1perc, file = paste0("CTL_subset",i,".blood.10x._DEmarkers_MAST.txt"))
-
-# and the significant ones (p<0.05)
+```
+select the significant ones (p<0.05)
+```
 CTL_subset.combined_DE_markers_1perc<-CTL_subset.combined_DE_markers_1perc[CTL_subset.combined_DE_markers_1perc$p_val_adj <0.05,]
 number_DE_genes[i,a]<-nrow(CTL_subset.combined_DE_markers_1perc)
-
-# merge all DE results with risk genes
+```
+determine risk genes
+```
 risk_all_filtered_subset<-merge(risk_use, CTL_subset.combined_DE_markers_1perc, by="gene", all=F)
 write.csv(risk_all_filtered_subset, paste0("riskgenes_subset",i,"_vs_cd_filtered.csv"))
 number_DE_riskgenes[i,b]<-nrow(risk_all_filtered_subset)}
-
+```
+write output file with numbers DE genes and numbers risk genes
+```
 write.csv(number_DE_genes, "number_DE_genes_cd_vs_10xsubsets.csv")
 write.csv(number_DE_riskgenes, "number_DE_riskgenes_cd_vs_10xsubsets_newriskgenes.csv")
-
-# extract and count which genes are upregulated in CD (on cluster)
+```
+extract and count which genes are upregulated in CD (on cluster)
+```
 for (n in 1:1000){
   cat("iteration", n, "\n")
   CTL_subset.combined_DE_markers_1perc<-read.table(paste0("~/nonrandomised_permutation_10xsubset_cd/CTL_subset", n, ".blood.10x._DEmarkers_MAST.txt"))
@@ -367,16 +374,22 @@ for (n in 1:1000){
   number_DE_riskgenes[n,b]<-nrow(risk_all_filtered_subset)}
 mean(number_DE_riskgenes$number_DEriskgenes)
 mean(number_DE_genes$number_DEgenes)
-
-
+```
+merge all riskgenes found in 1000 permutations
+```
 riskgenes<- read.csv("riskgenes_cd_subset1_vs_cd_filtered.csv", row.names=1)
 for(n in 2:1000){
   cat("iteration", n, "\n")
   x<-read.csv(paste0("riskgenes_cd_subset", n, "_vs_cd_filtered.csv"), row.names=1)
   riskgenes<-rbind(x, riskgenes)
 }
+```
+write output file with counts of DE risk genes
+```
 write.csv(table(riskgenes$gene), "riskgene_counts_csv.csv")
-
+```
+merge all DE genes found in 1000 permutations
+```
 setwd("/..")
 DEgenes<- read.table("CTL_subset1.blood.10x._DEmarkers_MAST.txt", row.names=1)
 for(n in 2:1000){
@@ -384,46 +397,27 @@ for(n in 2:1000){
   x<-read.table(paste0("CTL_subset", n, ".blood.10x._DEmarkers_MAST.txt"), row.names=1)
   DEgenes<-rbind(x, DEgenes)
 }
-
-# and the significant ones (p<0.05)
+```
+and the significant ones (p<0.05)
+```
 DEgenes<-DEgenes[DEgenes$p_val_adj <0.05,]
-# and the CD upregulated ones
+```
+and the CD upregulated ones
+```
 DEgenes_CD<-DEgenes[DEgenes$cluster == "cd",]
+```
+write output file with counts of DE genes
+```
 write.csv(table(DEgenes_CD$gene), "gene_counts_cd.csv")
-
+```
+calculate means for subsequent permutation analyses
+```
 mean(number_DE_riskgenes$number_DEriskgenes)
 mean(number_DE_genes$number_DEgenes)
-
-setwd("/home/umcg-wunikenvenema/nonrandomised_permutation_10xsubset_cd/Up_in_subset10x")
-# extract and count which genes are upregulated in subset10x (on cluster)
-for (n in 1:1000){
-  cat("iteration", n, "\n")
-  CTL_subset.combined_DE_markers_1perc<-read.table(paste0("~/nonrandomised_permutation_10xsubset_cd/CTL_subset", n, ".blood.10x._DEmarkers_MAST.txt"))
-  # and the significant ones (p<0.05)
-  CTL_subset.combined_DE_markers_1perc<-CTL_subset.combined_DE_markers_1perc[CTL_subset.combined_DE_markers_1perc$p_val_adj <0.05,]
-  # and the CD upregulated ones
-  CTL_subset.combined_DE_markers_1perc<-CTL_subset.combined_DE_markers_1perc[CTL_subset.combined_DE_markers_1perc$cluster == "subset10x",]
-  number_DE_genes[n,a]<-nrow(CTL_subset.combined_DE_markers_1perc)
-  # merge all DE results with risk genes
-  risk_all_filtered_subset<-merge(risk_use, CTL_subset.combined_DE_markers_1perc, by="gene", all=F)
-  write.csv(risk_all_filtered_subset, paste0("riskgenes_subset",n ,"_vs_cd_filtered.csv"))
-  number_DE_riskgenes[n,b]<-nrow(risk_all_filtered_subset)}
-
-
-riskgenes<- read.csv("riskgenes_subset1_vs_cd_filtered.csv", row.names=1)
-for(n in 2:1000){
-  cat("iteration", n, "\n")
-  x<-read.csv(paste0("riskgenes_subset", n, "_vs_cd_filtered.csv"), row.names=1)
-  riskgenes<-rbind(x, riskgenes)
-}
-write.csv(table(riskgenes$gene), "riskgene_counts_csv.csv")
-
-
-# and the CD upregulated ones
-DEgenes_subset10x<-DEgenes[DEgenes$cluster == "subset10x",]
-write.csv(table(DEgenes_subset10x$gene), "gene_counts_subset10x.csv")
 ```
-
+same for subset10x
+```
+```
 **Plotting**
 ---
 **Celltypes in all tissues**
