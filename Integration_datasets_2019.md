@@ -2,13 +2,13 @@
 # "Integration of multiple datasets on himem cluster"
 author: W. Uniken Venema
 ---
-## Prepare files
+## Prepare files <!--install libraries-->
 ```
 library(Seurat)
 install.packages("devtools")
 library(devtools)
 install.packages("hdf5r")
-library(hdf5r) <!--install libraries-->
+library(hdf5r) 
 ```
 open files
 ```
