@@ -195,4 +195,7 @@ alldata.integrated <- RunUMAP(alldata.integrated, dims = 1:40)
 alldata.integrated <- FindNeighbors(alldata.integrated, reduction = "pca", dims = 1:40, nn.eps = 0.5)
 alldata.integrated <- FindClusters(alldata.integrated, resolution = 3, n.start = 10)
 ```
-
+calculate DE between clusters to define cell types
+```
+markers_allcells<-FindAllMarkers(alldata.integrated, max.cells.per.ident=1000)
+```
