@@ -130,5 +130,68 @@ dim(Re_fresh_prot@assays$RNA)
 dim(Col_frozen_coll_singlets@assays$RNA)
 ```
 
+###On himem cluster:
 
+```
+load("/x/Re_fresh_protII_sct.Rd")
+load("/x/TI_fresh_collII_sct.Rd")
+load("/x/TI_frozen_collII_sct.Rd")
+load("/x/TI_frozen_protII_sct.Rd")
+load("/x/fib_fresh_split_sct.Rd")
+load("/x/imm_fresh_split_sct.Rd")
+load("/x/epi_fresh_split_sct.Rd")
+load("/x/TI_fresh_protII_sct.Rd")
+load("/x/Col_fresh_collIII_sct.Rd")
+load("/x/Col_frozen_collIII_sct.Rd")
+load("/x/Col_frozen_collI_sct.Rd")
+```
+prep separate data files
+```
+TI_fresh_protII@meta.data$dataset <- "Sanger_TI_fresh_protII"
+Col_frozen_collI@meta.data$dataset<- "UMCG_Col_frozen_collI"
+Col_frozen_collIII@meta.data$dataset<- "Takeda_Col_frozen_collIII"
+Col_fresh_collIII@meta.data$dataset<- "Takeda_Col_fresh_collIII"
+epi_fresh_split@meta.data$dataset<- "Smillie_epi_fresh_split"
+imm_fresh_split@meta.data$dataset<- "Smillie_imm_fresh_split"
+fib_fresh_split@meta.data$dataset<- "Smillie_fib_fresh_split"
+TI_frozen_protII@meta.data$dataset<- "Sanger_TI_frozen_protII"
+TI_frozen_collII@meta.data$dataset<- "Sanger_TI_frozen_collII"
+TI_fresh_collII@meta.data$dataset<- "Sanger_TI_fresh_collII"
+Re_fresh_protII@meta.data$dataset<- "Sanger_Re_fresh_protII"
+```
+give cells unique identity
+```
+TI_fresh_protII<-RenameCells(TI_fresh_protII, add.cell.id="TFP2")
+Col_frozen_collI<-RenameCells(Col_frozen_collI, add.cell.id="CCC1")
+Col_frozen_collIII<-RenameCells(Col_frozen_collIII, add.cell.id="CCC3")
+Col_fresh_collIII<-RenameCells(Col_fresh_collIII, add.cell.id="CFC3")
+epi_fresh_split<-RenameCells(epi_fresh_split, add.cell.id="EFS")
+imm_fresh_split<-RenameCells(imm_fresh_split, add.cell.id="IFS")
+fib_fresh_split<-RenameCells(fib_fresh_split, add.cell.id="FFS")
+TI_frozen_protII<-RenameCells(TI_frozen_protII, add.cell.id="TCP2")
+TI_frozen_collII<-RenameCells(TI_frozen_collII, add.cell.id="TCC2")
+TI_fresh_collII<-RenameCells(TI_fresh_collII, add.cell.id="TFC2")
+Re_fresh_protII<-RenameCells(Re_fresh_protII, add.cell.id="RFP2")
+```
+make integration list
+```
+alldata_202002_integration_list <- list(TI_frozen_protII, TI_frozen_collII, TI_fresh_collII, Re_fresh_protII,TI_fresh_protII, Col_frozen_collI, Col_fresh_collIII, Col_frozen_collIII,epi_fresh_split, imm_fresh_split, fib_fresh_split)
+```
+integrate
+```
+features <- SelectIntegrationFeatures(object.list = alldata_202002_integration_list, nfeatures = 3000)
+alldata_202002_integration_list <- PrepSCTIntegration(object.list = alldata_202002_integration_list, anchor.features = features)
+alldata_202002_integration_list <- lapply(X = alldata_202002_integration_list, FUN = RunPCA, verbose = FALSE, features = features)
+anchors <- FindIntegrationAnchors(object.list = alldata_202002_integration_list, anchor.features = features, normalization.method = "SCT", reduction = "rpca")
+rm(alldata_202002_integration_list)
+alldata.integrated <- IntegrateData(anchorset = anchors, normalization.method = "SCT")
+rm(anchors)
+```
+prepare integrated file for analysis
+```
+alldata.integrated <- RunPCA(alldata.integrated, verbose = FALSE)
+alldata.integrated <- RunUMAP(alldata.integrated, dims = 1:30)
+alldata.integrated <- FindNeighbors(alldata.integrated, reduction = "pca", dims = 1:30, nn.eps = 0.5)
+alldata.integrated <- FindClusters(alldata.integrated, resolution = 3, n.start = 10)
+```
 
