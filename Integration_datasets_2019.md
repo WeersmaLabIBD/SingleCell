@@ -189,9 +189,10 @@ rm(anchors)
 ```
 prepare integrated file for analysis
 ```
-alldata.integrated <- RunPCA(alldata.integrated, verbose = FALSE)
-alldata.integrated <- RunUMAP(alldata.integrated, dims = 1:30)
-alldata.integrated <- FindNeighbors(alldata.integrated, reduction = "pca", dims = 1:30, nn.eps = 0.5)
+alldata.integrated <- ScaleData(alldata.integrated, verbose = FALSE)
+alldata.integrated <- RunPCA(alldata.integrated, verbose = FALSE, npcs=60)
+alldata.integrated <- RunUMAP(alldata.integrated, dims = 1:40)
+alldata.integrated <- FindNeighbors(alldata.integrated, reduction = "pca", dims = 1:40, nn.eps = 0.5)
 alldata.integrated <- FindClusters(alldata.integrated, resolution = 3, n.start = 10)
 ```
 
