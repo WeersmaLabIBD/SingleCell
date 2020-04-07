@@ -209,7 +209,7 @@ load the Seuratfile of the dataset you want to predict cell types for
 dataset_seurat<-load("dataset.rds")
 ```
 convert datasets to SingleCellExperiment format and lognormalize counts
-``
+```
 smillie_subset<-as.SingleCellExperiment(smillie_subset_healthy, assay="RNA")
 smillie_subset<-logNormCounts(smillie_subset)
 dataset<-as.SingleCellExperiment(dataset_seurat, assay="RNA")
