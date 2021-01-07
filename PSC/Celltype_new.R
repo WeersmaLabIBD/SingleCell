@@ -133,7 +133,6 @@ data = subset(data, subset = celltypes != "MT_Hi_B")
 data = subset(data, subset = celltypes != "MT-Hi_plasma")
 data = subset(data, subset = celltypes != "Mt-Hi_stromal")
 data = subset(data, subset = celltypes != "MT-Hi-enterocyte")
-data = subset(data, subset = sample != "3296")
 
 Idents(data)=data$celltypes
 DimPlot(data, label = T, repel = T)
@@ -144,11 +143,10 @@ data <-FindNeighbors(data, dims = 1:30)
 data<-FindClusters(data, resolution = 0.4)
 
 Idents(data)=data$celltypes
-DimPlot(data, label = T, repel = T, order = c("T_activated_FOS_low", "Absorptive_enterocyte", "IgA_plasma", "WNT5B+", "Aborptive_TA"))
+DimPlot(data, label = T, repel = T, order = c("T_activated_FOS_low", "Absorptive_enterocyte", "IgA_plasma", "WNT5B+", "Aborptive_TA")) + NoLegend()
+
+data = subset(data, subset = sample != "3296")
 
 saveRDS(data, "Data/PSC_processed_oct.rds")
 
 # create figures
-# DimPlot(stromal, label=T, pt.size = 0.3, label.size = 6, repel = T) + NoLegend()
-# ggsave("Data/clusters_stromal_oct.pdf", height = 9, width = 16)
-# DimPlot(data1, label = T, repel = T, order = c("T_activated_FOS_low", "Absorptive_enterocyte", "IgA_plasma", "WNT5B+", "Aborptive_TA", "REG_TA"), pt.size = 0.25, label.size = 5) + NoLegend()
