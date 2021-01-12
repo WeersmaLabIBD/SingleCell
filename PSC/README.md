@@ -9,6 +9,6 @@ Information on wet lab processes can be found here: @Werna aanvullen. Below is d
 
 Analyses:
 - Proportion_analyses.R was used for differential abundance analysis
-- DE_analysis.R was used to identify differentially expressed genes for PSC I vs NI and UC I vs NI, and GO terms associated
+- DE_analysis.R was used to identify differentially expressed genes for several comparisons, and GO terms associated
 - DE_analysis_final_hopelijk.R was used to identify differentially expressed genes, but corrected for number of cells using permutation analysis
 - Cellchat.R was used to perform cell-cell interaction analysis (https://github.com/sqjin/CellChat). This was done on a subset of cells for efficiency. 
