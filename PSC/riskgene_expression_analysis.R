@@ -84,6 +84,63 @@ write.csv(PSC_I, "~/PSC_I_bonferroni_risk_genes_celltypes.csv")
 write.csv(UC_NI, "~/UC_NI_bonferroni_risk_genes_celltypes.csv")
 write.csv(PSC_NI, "~/PSC_NI_bonferroni_risk_genes_celltypes.csv")
 
+# plot
+library(ggplot2)
+PSC_I <- filter(PSC_I, PSC_I$p_val_adj <= 0.05)
+UC_I <- filter(UC_I, UC_I$p_val_adj <= 0.05)
+UC_NI <- filter(UC_NI, UC_NI$p_val_adj <=0.05)
+PSC_NI <- filter(PSC_NI, PSC_NI$p_val_adj <=0.05)
+
+UC_I$Adj_p_value <- ifelse(UC_I$p_val_adj <= 0.001, "< 0.001", ifelse(UC_I$p_val_adj <= 0.01, "< 0.01", "< 0.05"))
+UC_I$Adj_p_value <- factor(UC_I$Adj_p_value, levels = c("< 0.05", "< 0.01","< 0.001"))
+UC_NI$Adj_p_value <- ifelse(UC_NI$p_val_adj <= 0.001, "< 0.001", ifelse(UC_NI$p_val_adj <= 0.01, "< 0.01", "< 0.05"))
+UC_NI$Adj_p_value <- factor(UC_NI$Adj_p_value, levels = c("< 0.05", "< 0.01","< 0.001"))
+PSC_I$Adj_p_value <- ifelse(PSC_I$p_val_adj <= 0.001, "< 0.001", ifelse(PSC_I$p_val_adj <= 0.01, "< 0.01", "< 0.05"))
+PSC_I$Adj_p_value <- factor(PSC_I$Adj_p_value, levels = c("< 0.05", "< 0.01","< 0.001"))
+PSC_NI$Adj_p_value <- ifelse(PSC_NI$p_val_adj <= 0.001, "< 0.001", ifelse(PSC_NI$p_val_adj <= 0.01, "< 0.01", "< 0.05"))
+PSC_NI$Adj_p_value <- factor(PSC_NI$Adj_p_value, levels = c("< 0.05", "< 0.01","< 0.001"))
+UC_I$direction <- ifelse(UC_I$avg_logFC > 0, "up", "down")
+UC_NI$direction <- ifelse(UC_NI$avg_logFC > 0, "up", "down")
+PSC_I$direction <- ifelse(PSC_I$avg_logFC > 0, "up", "down")
+PSC_NI$direction <- ifelse(PSC_NI$avg_logFC > 0, "up", "down")
+
+ggplot(PSC_I, aes(x = Gene, y = celltype, color = direction)) + 
+  geom_point(aes(alpha = Adj_p_value), size = 5) +
+  scale_alpha_manual(values =c(0.2, 0.5, 1)) +
+  scale_color_manual(values = c("#00AFBB", "#FC4E07")) +
+  theme_bw() +
+  labs(title =  "PSC risk genes in PSC_I vs HC")
+
+ggsave("Results/Figures/Riskgenes_PSCI.pdf", height = 7)
+
+ggplot(PSC_NI, aes(x = Gene, y = celltype, color = direction)) + 
+  geom_point(aes(alpha = Adj_p_value), size = 5) +
+  scale_alpha_manual(values =c(1)) +
+  scale_color_manual(values = c("#00AFBB", "#FC4E07")) +
+  theme_bw() +
+  labs(title =  "PSC risk genes in PSC_NI vs HC")
+
+ggsave("Results/Figures/Riskgenes_PSCNI.pdf", height = 7)
+
+ggplot(UC_I, aes(x = Gene, y = celltype, color = direction)) + 
+  geom_point(aes(alpha = Adj_p_value), size = 5) +
+  scale_alpha_manual(values =c(0.2, 0.5, 1)) +
+  scale_color_manual(values = c("#00AFBB", "#FC4E07")) +
+  theme_bw()+
+  labs(title =  "UC risk genes in UC_I vs HC")
+
+ggsave("Results/Figures/Riskgenes_UCI.pdf", height = 7)
+
+ggplot(UC_NI, aes(x = Gene, y = celltype, color = direction)) + 
+  geom_point(aes(alpha = Adj_p_value), size = 5) +
+  scale_alpha_manual(values =c(0.5, 1)) +
+  scale_color_manual(values = c("#00AFBB", "#FC4E07")) +
+  theme_bw()+
+  labs(title =  "UC risk genes in UC_NI vs HC")
+
+ggsave("Results/Figures/Riskgenes_UCNI.pdf", height = 7)
+
+# old
 library(viridis)
 library(ggplot2)
 
