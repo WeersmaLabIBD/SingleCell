@@ -10,7 +10,7 @@ PSC_risk<-genes[genes$function. == "PSC_and_suggestive_risk_genes",]
 Idents(data) <- "celltypes"
 celltypes <- levels(data$celltypes)
 table(data$celltypes, data$state)
-celltypes <- celltypes[-c(2,3,4,6,7,8,9,10,13,14,15,18,19,20,21,22,24,25,26,32,35,39,40,41,42)] #filter out celltypes with too little (<100) cells per group
+celltypes <- celltypes[-c(2,3,4,6,7,8,9,10,13,14,15,18,19,20,21,22,24,25,26,32,35,39,40,41,42)] #filter out celltypes with too few (<100) cells per group
 DefaultAssay(data)<-"RNA"
 
 #####
@@ -22,16 +22,45 @@ UC_risk_in_set<-merge(allgenes, UC_risk, by="Gene")
 write.csv(UC_risk_in_set, "~/ucputativeriskgenes_smillie_inset.csv")
 write.csv(PSC_risk_in_set, "~/PSCgenes_inset.csv")
 
-PSC <- data.frame(matrix(ncol = 6, nrow = 0))
-colnames(PSC) <- c("p_val", "avg_logFC","pct.1","pct2","p_val_adj","celltype")
+PSC_risk<-read.csv("~/PSC_genes.csv", sep=";")
+colnames(PSC_risk)[1]<-"Gene"
 
-for(i in 1:17){
+DEgenes <- FindMarkers(data, subset.ident = celltypes[1], group.by = "state", test.use = "MAST", ident.1 = "PSC-I", ident.2 = "HC-NI")
+DEgenes$celltype <- celltypes[1]
+DEgenes$Gene <- rownames(DEgenes)
+PSC <- merge(DEgenes, PSC_risk, by = "Gene")
+
+for(i in 2:17){
+  DEgenes <- FindMarkers(data, subset.ident = celltypes[i], group.by = "state", test.use = "MAST", ident.1 = "PSC-I", ident.2 = "HC-NI")
+  DEgenes$celltype <- celltypes[i]
+  DEgenes$Gene <- rownames(DEgenes)
+  DEgenes1 <- merge(DEgenes, PSC_risk, by = "Gene")
+  PSC <- rbind(PSC, DEgenes1)
+}
+
+PSC_I<-PSC
+
+DEgenes <- FindMarkers(data, subset.ident = celltypes[1], group.by = "state", test.use = "MAST", ident.1 = "PSC-NI", ident.2 = "HC-NI")
+DEgenes$celltype <- celltypes[1]
+DEgenes$Gene <- rownames(DEgenes)
+PSC <- merge(DEgenes, PSC_risk, by = "Gene")
+
+for(i in 2:17){
   DEgenes <- FindMarkers(data, subset.ident = celltypes[i], group.by = "state", test.use = "MAST", ident.1 = "PSC-NI", ident.2 = "HC-NI")
   DEgenes$celltype <- celltypes[i]
   DEgenes$Gene <- rownames(DEgenes)
-  DEgenes <- merge(DEgenes, PSC_risk, by = "Gene")
-  PSC <- rbind(PSC, DEgenes)
+  DEgenes1 <- merge(DEgenes, PSC_risk, by = "Gene")
+  PSC <- rbind(PSC, DEgenes1)
 }
+
+PSC_NI<-PSC
+
+x<-merge(PSC_risk, allgenes, by="Gene", all=F) # 71 PSC risk genes in set 
+PSC_I$p_val_adj<-PSC_I$p_val*71
+PSC_NI$p_val_adj<-PSC_NI$p_val*71
+
+write.csv(PSC_I, "~/PSC_I_bonferroni_allrisk_genes_celltypes.csv")
+write.csv(PSC_NI, "~/PSC_NI_onferroni_allrisk_genes_celltypes.csv")
 
 UC <- data.frame(matrix(ncol = 6, nrow = 0))
 colnames(UC) <- c("p_val", "avg_logFC","pct.1","pct2","p_val_adj","celltype")
@@ -44,17 +73,6 @@ for(i in 1:17){
 }
 
 UC_NI<-UC
-PSC_NI<-PSC
-
-PSC <- data.frame(matrix(ncol = 6, nrow = 0))
-colnames(PSC) <- c("p_val", "avg_logFC","pct.1","pct2","p_val_adj","celltype")
-for(i in 1:17){
-  DEgenes <- FindMarkers(data, subset.ident = celltypes[i], group.by = "state", test.use = "MAST", ident.1 = "PSC-I", ident.2 = "HC-NI")
-  DEgenes$celltype <- celltypes[i]
-  DEgenes$Gene <- rownames(DEgenes)
-  DEgenes <- merge(DEgenes, PSC_risk, by = "Gene")
-  PSC <- rbind(PSC, DEgenes)
-}
 
 UC <- data.frame(matrix(ncol = 6, nrow = 0))
 colnames(UC) <- c("p_val", "avg_logFC","pct.1","pct2","p_val_adj","celltype")
@@ -67,22 +85,13 @@ for(i in 1:17){
 }
 
 UC_I<-UC
-PSC_I<-PSC
-
-PSC_significance_level_bonferroni<-0.05/40 #40 genes in total
-UC_significance_level_bonferroni<-0.05/54 #54 genes in total
-
-PSC_I$p_val_adj<-PSC_I$p_val*40
-PSC_NI$p_val_adj<-PSC_NI$p_val*40
+UC_significance_level_bonferroni<-0.05/54 #54 UCrisk genes in total in set
 
 UC_I$p_val_adj<-UC_I$p_val*54
 UC_NI$p_val_adj<-UC_NI$p_val*54
 
 write.csv(UC_I, "~/UC_I_bonferroni_risk_genes_celltypes.csv")
-write.csv(PSC_I, "~/PSC_I_bonferroni_risk_genes_celltypes.csv")
-
 write.csv(UC_NI, "~/UC_NI_bonferroni_risk_genes_celltypes.csv")
-write.csv(PSC_NI, "~/PSC_NI_bonferroni_risk_genes_celltypes.csv")
 
 # plot
 library(ggplot2)
