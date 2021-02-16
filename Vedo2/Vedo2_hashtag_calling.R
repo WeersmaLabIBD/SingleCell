@@ -5,13 +5,16 @@ library(scran)
 library(scater)
 library(dplyr)
 
+
 #Read dataframe 11 lane1
+#Read10X() function reads in the output of the cellranger, returning a unique molecular identified (UMI) count matrix.
+#The values in this matrix represent the number of molecules for each feature (i.e. gene, row) that are detected in each cell (column)
 dataset_10x<-Read10X("Data/filtered_feature_bc_matrix/200611_lane1/")
 dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "Vedo2")
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.98)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.996)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -50,6 +53,7 @@ for (i in 1:nrow(All)){
 
 table(All$HTO)
 table(All$HTO_status)
+
 Final_HTO <- All$HTO
 names(Final_HTO) <- rownames(All)
 dataset <- AddMetaData(
@@ -67,7 +71,16 @@ table(dataset$Final_HTO, dataset$HTO_classification)
 #qc and preprocess
 DefaultAssay(dataset)<-"RNA"
 dataset[["percent.mt"]] <- PercentageFeatureSet(dataset, pattern = "^MT-")
+#show QC metrics for the first 5 cells
+head(dataset@meta.data, 5)
+#visualize QC metrics as violin plots
+VlnPlot(dataset, features = c("nFeature_RNA", 'nCount_RNA', 'percent.mt'), ncol = 3)
 VlnPlot(dataset, "percent.mt")
+#FeatureScatter is used to visualize feature-feature relationships
+plot1 <- FeatureScatter(dataset, feature1 = "nCount_RNA", feature2 = 'percent.mt')
+plot2 <- FeatureScatter(dataset, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+plot1 + plot2
+#Filter for %mito
 dataset<-subset(dataset, subset=percent.mt < 60)
 HTO_number_11lane1 <- sum(dataset$HTO_classification.global == "Singlet")
 souporcell_number_11lane1 <- sum(dataset$Final_HTO_status == "Singlet")
@@ -83,7 +96,7 @@ dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
 FeaturePlot(dataset, "BEST4")
-saveRDS(dataset, file="Data/preprocessed_lanes/200611_lane1_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200611_lane1_sct.rds")
 
 
 #Read dataframe 200611_lane2
@@ -92,7 +105,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.894)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.994)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -163,7 +176,7 @@ dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
 FeaturePlot(dataset, "AOC3")
-saveRDS(dataset, file="Data/preprocessed_lanes/200611_lane2_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200611_lane2_sct.rds")
 
 
 #Read dataframe 200611_lane3
@@ -172,7 +185,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.898)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.970)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -210,6 +223,7 @@ for (i in 1:nrow(All)){
 
 table(All$HTO)
 table(All$HTO_status)
+
 Final_HTO <- All$HTO
 names(Final_HTO) <- rownames(All)
 dataset <- AddMetaData(
@@ -243,7 +257,7 @@ dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
 FeaturePlot(dataset, "IL11")
-saveRDS(dataset, file="Data/preprocessed_lanes/200611_lane3_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200611_lane3_sct.rds")
 
 
 #Read dataframe 200611_lane4
@@ -252,7 +266,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.98)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.994)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -325,7 +339,7 @@ dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
 FeaturePlot(dataset, "IL13RA2")
-saveRDS(dataset, file="Data/preprocessed_lanes/200611_lane4_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200611_lane4_sct.rds")
 
 
 #Read dataframe 200612_lane1
@@ -334,7 +348,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.947)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.9985)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -406,7 +420,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200612_lane1_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200612_lane1_sct.rds")
 
 
 #Read dataframe 200612_lane2
@@ -415,7 +429,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.852)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.962)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -487,7 +501,7 @@ dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
 FeaturePlot(dataset, "IGHA2")
-saveRDS(dataset, file="Data/preprocessed_lanes/200612_lane2_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200612_lane2_sct.rds")
 
 
 #Read dataframe 200612_lane3
@@ -567,7 +581,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200612_lane3_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200612_lane3_sct.rds")
 
 
 #Read dataframe 200612_lane4
@@ -576,7 +590,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.915)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.98)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -648,7 +662,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200612_lane4_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200612_lane4_sct.rds")
 
 
 #Read dataframe 200625_lane1
@@ -657,7 +671,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.951)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.992)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -729,7 +743,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200625_lane1_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200625_lane1_sct.rds")
 
 
 #Read dataframe 200625_lane2
@@ -738,7 +752,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.865)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.983)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -809,7 +823,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200625_lane2_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200625_lane2_sct.rds")
 
 
 #Read dataframe 200625_lane3
@@ -818,7 +832,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.88)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.98)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -889,7 +903,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200625_lane3_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200625_lane3_sct.rds")
 
 
 #Read dataframe 200625_lane4
@@ -898,7 +912,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.955)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.9955)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -970,7 +984,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200625_lane4_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200625_lane4_sct.rds")
 
 
 #Read dataframe 200626_lane1
@@ -979,7 +993,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.86)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.95)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -1050,7 +1064,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200626_lane1_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200626_lane1_sct.rds")
 
 
 #Read dataframe 200626_lane2
@@ -1131,7 +1145,7 @@ dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "BEST4")
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200626_lane2_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200626_lane2_sct.rds")
 
 
 #Read dataframe 200626_lane3
@@ -1140,7 +1154,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.869)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.960)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -1212,7 +1226,7 @@ dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "BEST4")
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200626_lane3_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200626_lane3_sct.rds")
 
 
 #Read dataframe 200626_lane4
@@ -1221,7 +1235,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.869)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.9327)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -1293,7 +1307,7 @@ dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "BEST4")
 FeaturePlot(dataset, "EPCAM")
-saveRDS(dataset, file="Data/preprocessed_lanes/200626_lane4_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200626_lane4_sct.rds")
 
 
 #Read dataframe 200618_lane1 (PBMC)
@@ -1302,7 +1316,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.9999)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.999912)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -1365,7 +1379,7 @@ table(dataset$Final_HTO, dataset$HTO_classification)
 DefaultAssay(dataset)<-"RNA"
 dataset[["percent.mt"]] <- PercentageFeatureSet(dataset, pattern = "^MT-")
 VlnPlot(dataset, "percent.mt")
-dataset<-subset(dataset, subset=percent.mt < 25)
+dataset<-subset(dataset, subset=percent.mt < 15)
 HTO_number_18lane1 <- sum(dataset$HTO_classification.global == "Singlet")
 souporcell_number_18lane1 <- sum(dataset$Final_HTO_status == "Singlet")
 Idents(dataset) <- "Final_HTO_status"
@@ -1379,7 +1393,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "CD3E")
-saveRDS(dataset, file="Data/preprocessed_lanes/200618_lane1_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200618_lane1_sct.rds")
 
 
 #Read dataframe 200618_lane2 (PBMC)
@@ -1388,7 +1402,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.9905)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.99641)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -1454,7 +1468,7 @@ table(dataset$Final_HTO, dataset$HTO_classification)
 DefaultAssay(dataset)<-"RNA"
 dataset[["percent.mt"]] <- PercentageFeatureSet(dataset, pattern = "^MT-")
 VlnPlot(dataset, "percent.mt")
-dataset<-subset(dataset, subset=percent.mt < 25)
+dataset<-subset(dataset, subset=percent.mt < 15)
 HTO_number_18lane2 <- sum(dataset$HTO_classification.global == "Singlet")
 souporcell_number_18lane2 <- sum(dataset$Final_HTO_status == "Singlet")
 Idents(dataset) <- "Final_HTO_status"
@@ -1468,7 +1482,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "CD3E")
-saveRDS(dataset, file="Data/preprocessed_lanes/200618_lane2_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200618_lane2_sct.rds")
 
 
 #Read dataframe 200618_lane3 (PBMC)
@@ -1477,7 +1491,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.9922)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.997)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -1537,7 +1551,7 @@ table(dataset$Final_HTO, dataset$HTO_classification)
 DefaultAssay(dataset)<-"RNA"
 dataset[["percent.mt"]] <- PercentageFeatureSet(dataset, pattern = "^MT-")
 VlnPlot(dataset, "percent.mt")
-dataset<-subset(dataset, subset=percent.mt < 25)
+dataset<-subset(dataset, subset=percent.mt < 15)
 HTO_number_18lane3 <- sum(dataset$HTO_classification.global == "Singlet")
 souporcell_number_18lane3 <- sum(dataset$Final_HTO_status == "Singlet")
 Idents(dataset) <- "Final_HTO_status"
@@ -1551,7 +1565,7 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "CD3E")
-saveRDS(dataset, file="Data/preprocessed_lanes/200618_lane3_sct.rds")
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200618_lane3_sct.rds")
 
 
 #Read dataframe 200618_lane4 (PBMC)
@@ -1560,7 +1574,7 @@ dataset<-CreateSeuratObject(counts = dataset_10x$`Gene Expression`, project = "V
 dataset[['HTO']]<-CreateAssayObject(counts = dataset_10x$`Antibody Capture`)
 dataset<-subset(dataset, nCount_RNA > 200)
 dataset <- NormalizeData(dataset, assay = "HTO", normalization.method = "CLR")
-dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.9815)
+dataset <- HTODemux(dataset, assay = "HTO", positive.quantile = 0.99)
 table(dataset$HTO_classification.global)
 table(dataset$HTO_maxID)
 HTOHeatmap(dataset, assay = "HTO", ncells = 1000)
@@ -1627,7 +1641,7 @@ table(dataset$Final_HTO, dataset$HTO_classification)
 DefaultAssay(dataset)<-"RNA"
 dataset[["percent.mt"]] <- PercentageFeatureSet(dataset, pattern = "^MT-")
 VlnPlot(dataset, "percent.mt")
-dataset<-subset(dataset, subset=percent.mt < 25)
+dataset<-subset(dataset, subset=percent.mt < 15)
 HTO_number_18lane4 <- sum(dataset$HTO_classification.global == "Singlet")
 souporcell_number_18lane4 <- sum(dataset$Final_HTO_status == "Singlet")
 Idents(dataset) <- "Final_HTO_status"
@@ -1641,5 +1655,4 @@ dataset <- FindNeighbors(dataset, dims = 1:30, verbose = FALSE)
 dataset <- FindClusters(dataset, resolution = 0.2, verbose = FALSE)
 DimPlot(dataset)
 FeaturePlot(dataset, "CD3E")
-saveRDS(dataset, file="Data/preprocessed_lanes/200618_lane4_sct.rds")
-
+saveRDS(dataset, file="Data/preprocessed_lanes_new/200618_lane4_sct.rds")
