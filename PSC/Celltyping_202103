@@ -10,12 +10,17 @@ library(openxlsx)
 
 data<- readRDS("PSC_202002_integrated_v2_noribo.rds")
 data=UpdateSeuratObject(data)
-DimPlot(data, label = T) + NoLegend()
+#DimPlot(data, label = T) + NoLegend()
 
 data@meta.data$disease = sapply(strsplit(data$Final_HTO,"-"), `[`, 1)
 data@meta.data$inflammation = sapply(strsplit(data$Final_HTO,"-"), `[`, 2)
 data@meta.data$sample = sapply(strsplit(data$Final_HTO,"-"), `[`, 3)
 data@meta.data$state <- paste(data$disease, data$inflammation, sep='-')
+data = subset(data, subset = sample != "3296")
+data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-NI-3019"]<-"PSC-I-XXXX"
+data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-I-3019"]<-"PSC-NI-XXXX"
+
+
 
 # recluster subset
 # epi = average expression EPCAM > 5
@@ -35,6 +40,7 @@ epi=RenameIdents(epi,new.ident)
 DimPlot(epi, label=T)
 epi[["celltypes"]] <- Idents(object = epi)
 meta_epi<-epi@meta.data
+write.csv(meta_epi, "meta_epi.csv")
 
 # leuko = average expression PTPRC (CD45) > 5
 leuko<-subset(data, idents = c("2","11","18","24","27","15","4","26"))
@@ -48,12 +54,14 @@ DefaultAssay(leuko)<-"RNA"
 #markers_leuko <- FindAllMarkers(leuko, only.pos = TRUE, min.pct = 0.25)
 #selected_markers_leuko <- markers_leuko %>% group_by(cluster) %>% top_n(n = 3, wt = avg_logFC)
 # all B cells (CD19 and/or CD20), all T cells (CD3E), non-T non-B is APC; Activated_mem_B (CD74, CD83, FCRL5); MAIT (IL7R, CD4, KLRB1); Treg (TNFRSF4, CD4); Naive_mem_T (SELL, CCR7); Mt; CD8_GNLY+ (GNLY, CD8A, NKG7); APC_CD4+ (CD14, CD74, CD4); CD8_GNLY- (CD8, NKG7); Cycling_activated_B_T (IER2, JUN); Activated_mem_B (CD74, CD83); APC_S100A8 (S100A8, CD74, CD14); Activated_B (CD74, CD83); Immature_T (CD74lo, FCRL5, TNFRSF4lo); Activated_B (CD74hi, FCRL5, CD83); Mt; Activated_B (CD74); APC_CD14- (AIF1, C1QC); CTL (GNLY, CD4); Naive_T_B (SELL, CCR7)  
-new.idents<-c("Activated_memory_B", "MAIT", "Treg", "Naive_memory_T", "Mt","CD8_GNLY+", "APC_CD4+", "CD8_GNLY-", "Cycling_T", "Activated_memory_B", "APC_S100A8+", "Activated_B", "Immature_T", "Activated_B", "Mt", "Cycling_B", "APC_CD14-", "CTL", "Naive_B")
+new.idents<-c("Activated_memory_B", "MAIT", "Treg", "Naive_memory_T", "Mt","CD8_GNLY+", "APC_CD4+", "CD8_GNLY-", "Cycling_T", "Activated_memory_B", "APC_S100A8+", "Activated_memory_B", "Immature_T", "Mature_B", "Mt", "Cycling_B", "APC_CD14-", "CTL", "Naive_B")
 names(new.idents) <- levels(leuko)
 leuko=RenameIdents(leuko,new.idents)
 DimPlot(leuko, label=T)
 leuko[["celltypes"]] <- Idents(object = leuko)
+
 meta_leuko<-leuko@meta.data
+write.csv(meta_leuko, "meta_leuko.csv")
 
 # stromal =  average expression THY1 > 0.4 (fibroblast), SOX10 > 2 (glia), MADCAM1 > 1 (endotheel)
 stromal<-subset(data, idents = c("9", "13", "20", "22", "25"))
@@ -72,6 +80,7 @@ DimPlot(stromal, label=T)
 stromal[["celltypes"]] <- Idents(object = stromal)
 DimPlot(stromal)
 meta_stromal<-stromal@meta.data
+write.csv(meta_stromal, "meta_stromal.csv")
 
 # plasma = remaining cells
 plasma<-subset(data, idents = c("1", "16", "12", "23", "5", "8"))
@@ -90,6 +99,7 @@ DimPlot(plasma, label=T)
 plasma[["celltypes"]] <- Idents(object = plasma)
 DimPlot(plasma)
 meta_plasma<-plasma@meta.data
+write.csv(meta_plasma, "meta_plasma.csv")
 
 # create meta_all
 colnames(meta_stromal)
@@ -106,12 +116,12 @@ x<-rbind(x, meta_epi)
 write.csv(x, "Data/meta_all2.csv")
 
 # add celltypes
-CellsMeta<-data.frame(data@meta.data)
 x$NAME<-rownames(x)
-CellsMeta$NAME<-row.names(CellsMeta)
 x<-x[,c(2,3)]
-row.names(CellsMeta)=NULL
 row.names(x)<-NULL
+CellsMeta<-data.frame(data@meta.data)
+CellsMeta$NAME<-row.names(CellsMeta)
+row.names(CellsMeta)=NULL
 keeping.order <- function(data, fn, ...) { 
   col <- ".sortColumn"
   data[,col] <- 1:nrow(data) 
@@ -122,11 +132,30 @@ keeping.order <- function(data, fn, ...) {
   out 
 } 
 CellsMeta<-keeping.order(CellsMeta, merge, y=x, by = "NAME", all=T)
-CellsMeta<-CellsMeta[,c(1,29)]
+CellsMeta<-CellsMeta[,c(1,30)]
 rownames(CellsMeta)<-CellsMeta$NAME
 data<-AddMetaData(data, CellsMeta)
 Idents(data)=data$celltypes
+
+
 DimPlot(data, label = T, repel = T)
+CellsMeta<-data.frame(data@meta.data)
+CellsMeta$NAME<-row.names(CellsMeta)
+row.names(CellsMeta)=NULL
+
+severity<-read.csv("severity_patients_3_2021.csv", sep=";")
+severity<-severity[-6,]
+severity$Final_HTO<-droplevels(severity$Final_HTO)
+dim(CellsMeta)
+CellsMeta<-merge(CellsMeta, severity, by="Final_HTO", all=T)
+dim(CellsMeta)
+
+CellsMeta<-CellsMeta[,c(28,30,31)]
+rownames(CellsMeta)<-CellsMeta$NAME
+dim(data)
+data<-AddMetaData(data, CellsMeta)
+dim(data)
+Idents(data)=data$celltypes
 
 data = subset(data, subset = celltypes != "Mt")
 data = subset(data, subset = celltypes != "MT_Hi_T")
@@ -138,14 +167,14 @@ data = subset(data, subset = celltypes != "MT-Hi-enterocyte")
 
 Idents(data)=data$celltypes
 DimPlot(data, label = T, repel = T)
-data = subset(data, subset = sample != "3296")
+
 DefaultAssay(data)<-"integrated"
 data <- RunUMAP(data, dims = 1:30)
 data <-FindNeighbors(data, dims = 1:30)
 data<-FindClusters(data, resolution = 0.4)
-data@meta.data<-merge(data@meta.data, severity, by="Final_HTO", all=T)
+
 Idents(data)=data$celltypes
-DimPlot(data, label = T, repel = T, order = c("Naive_memory_T", "Absorptive_enterocyte", "IgA_plasma", "WNT5B+", "Aborptive_TA")) + NoLegend()
+DimPlot(data, label = T, repel = T, order = c("MAIT", "Absorptive_enterocyte", "IgA_plasma", "WNT5B+", "Aborptive_TA")) + NoLegend()
 
 ggsave("dimplot_data2march2021.pdf", height=15, width=15)
 
