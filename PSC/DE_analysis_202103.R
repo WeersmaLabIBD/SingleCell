@@ -8,7 +8,7 @@ library(MAST)
 library(readxl)
 library(openxlsx)
 
-data<- readRDS("Data/PSC_processed_oct.rds")
+data<- readRDS("Data/PSC_processed_march_2021.rds")
 DefaultAssay(data) = "RNA"
 
 # Inflamed vs Non-Inflamed
