@@ -1,5 +1,5 @@
 library(Seurat)
-data<-readRDS("PSC_202002_integrated_v2_noribo.rds")
+data<-readRDS("Data/PSC_processed_march_2021.rds")
 
 
 data@meta.data$cell_cat<-"other"
