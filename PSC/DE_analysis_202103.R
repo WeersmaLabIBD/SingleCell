@@ -17,6 +17,24 @@ library(enrichR)
 
 DefaultAssay(data) = "RNA"
 
+# general markers
+Idents(data)<-"celltypes"
+IplusNI_cellularmarkers<-FindAllMarkers(data,test.use = "MAST", only.pos = T )
+write.csv(IplusNI_cellularmarkers, "Results/DE/IplusNI_cellularmarkers.csv")
+Idents(data)<-"inflammation"
+I_cellularmarkers<-FindAllMarkers(data,subset.ident = "I", group.by = "celltypes",test.use = "MAST", only.pos = T )
+write.csv(I_cellularmarkers, "Results/DE/I_cellularmarkers.csv")
+NI_cellularmarkers<-FindAllMarkers(data,subset.ident = "NI", group.by = "celltypes",test.use = "MAST", only.pos = T )
+write.csv(NI_cellularmarkers, "Results/DE/NI_cellularmarkers.csv")
+Idents(data)<-"state"
+PSCNI_cellularmarkers<-FindAllMarkers(data,subset.ident = "PSC-NI", group.by = "celltypes",test.use = "MAST", only.pos = T )
+write.csv(PSCNI_cellularmarkers, "Results/DE/PSCNI_cellularmarkers.csv")
+UCNI_cellularmarkers<-FindAllMarkers(data,subset.ident = "UC-NI", group.by = "celltypes",test.use = "MAST", only.pos = T )
+write.csv(UCNI_cellularmarkers, "Results/DE/UCNI_cellularmarkers.csv")
+HCNI_cellularmarkers<-FindAllMarkers(data,subset.ident = "HC-NI", group.by = "celltypes",test.use = "MAST", only.pos = T )
+write.csv(HCNI_cellularmarkers, "Results/DE/HCNI_cellularmarkers.csv")
+
+##
 
 # Inflamed vs Non-Inflamed
 Idents(data) <- "inflammation"
