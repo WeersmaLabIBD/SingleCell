@@ -36,6 +36,7 @@ Idents(epi)<-"integrated_snn_res.0.4"
 DefaultAssay(epi)<-"RNA"
 #markers_epi <- FindAllMarkers(epi, only.pos = TRUE, min.pct = 0.25)
 #selected_markers_epi <- markers_epi %>% group_by(cluster) %>% top_n(n = 3, wt = avg_logFC)
+# stem (LEFTY, LGR5, ASCL2); enteroendocrine (ASCL2, CHGA, CCL7), Tuft (TRPM5, HCK); Goblet (MUC2, TFF1); DUOX (MUC2lo, TFF1lo, DUOX2); BEST4 (BEST4); Absorptive_enterocyte (SLC26A3hi, RBP, CA1, SLC26A2); Immature_enterocyte (SLC26A3, RBP, CA1, SLC26A2, FABP1); Cycling_TA (CDC25C); RIBO_TA (LEFTY); Immature_Goblet (MUC2, TFF1lo) 
 new.ident=c("Immature_enterocyte", "Cycling_TA", "Absorptive_enterocyte", "Ribo_TA","Stem", "MT-Hi-enterocyte", "BEST4_enterocyte", "Immature_goblet", "DUOX2_enterocyte", "PLCG2_TA", "Absorptive_TA", "Tuft", "REG_TA","Enteroendocrine", "Goblet", "MAST")
 names(new.ident) <- levels(epi)
 epi=RenameIdents(epi,new.ident)
