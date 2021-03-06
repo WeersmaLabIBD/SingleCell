@@ -8,20 +8,6 @@ library(MAST)
 library(readxl)
 library(openxlsx)
 
-data<- readRDS("PSC_202002_integrated_v2_noribo.rds")
-data=UpdateSeuratObject(data)
-#DimPlot(data, label = T) + NoLegend()
-
-data@meta.data$disease = sapply(strsplit(data$Final_HTO,"-"), `[`, 1)
-data@meta.data$inflammation = sapply(strsplit(data$Final_HTO,"-"), `[`, 2)
-data@meta.data$sample = sapply(strsplit(data$Final_HTO,"-"), `[`, 3)
-data@meta.data$state <- paste(data$disease, data$inflammation, sep='-')
-data = subset(data, subset = sample != "3296")
-data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-NI-3019"]<-"PSC-I-XXXX"
-data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-I-3019"]<-"PSC-NI-XXXX"
-
-
-
 # recluster subset
 # epi = average expression EPCAM > 5
 epi<-subset(data, idents = c("6","7","17","19","0","14","10","3","21"))
@@ -54,7 +40,7 @@ DefaultAssay(leuko)<-"RNA"
 #markers_leuko <- FindAllMarkers(leuko, only.pos = TRUE, min.pct = 0.25)
 #selected_markers_leuko <- markers_leuko %>% group_by(cluster) %>% top_n(n = 3, wt = avg_logFC)
 # all B cells (CD19 and/or CD20), all T cells (CD3E), non-T non-B is APC; Activated_mem_B (CD74, CD83, FCRL5); MAIT (IL7R, CD4, KLRB1); Treg (TNFRSF4, CD4); Naive_mem_T (SELL, CCR7); Mt; CD8_GNLY+ (GNLY, CD8A, NKG7); APC_CD4+ (CD14, CD74, CD4); CD8_GNLY- (CD8, NKG7); Cycling_activated_B_T (IER2, JUN); Activated_mem_B (CD74, CD83); APC_S100A8 (S100A8, CD74, CD14); Activated_B (CD74, CD83); Immature_T (CD74lo, FCRL5, TNFRSF4lo); Activated_B (CD74hi, FCRL5, CD83); Mt; Activated_B (CD74); APC_CD14- (AIF1, C1QC); CTL (GNLY, CD4); Naive_T_B (SELL, CCR7)  
-new.idents<-c("Activated_memory_B", "MAIT", "Treg", "Naive_memory_T", "Mt","CD8_GNLY+", "APC_CD4+", "CD8_GNLY-", "Cycling_T", "Activated_memory_B", "APC_S100A8+", "Activated_memory_B", "Immature_T", "Mature_B", "Mt", "Cycling_B", "APC_CD14-", "CTL", "Naive_B")
+new.idents<-c("Activated_B", "MAIT", "Treg", "Memory_CD4T", "Mt","CD8pos", "DC", "CD8pos", "Cycling_T", "Mature_B", "Inflammatory_monocyte", "Mature_B", "Doublets", "Memory_B", "Mt", "Cycling_B", "Macrophage", "Cycling_T", "Doublets")
 names(new.idents) <- levels(leuko)
 leuko=RenameIdents(leuko,new.idents)
 DimPlot(leuko, label=T)
@@ -73,7 +59,7 @@ stromal <-FindClusters(stromal, resolution = 0.4)
 DimPlot(stromal, label=T)
 DefaultAssay(stromal)<-"RNA"
 #markers_stromal <- FindAllMarkers(stromal, only.pos = TRUE)
-new.idents<-c("WNT5B+", "Inflammatory_fibroblast", "RSPO3+", "WNT2B+", "endothelial", "endothelial", "Mt-Hi_stromal", "pericytes", "glia", "myofibroblasts", "endothelial", "endothelial")
+new.idents<-c("WNT5B+", "Inflammatory_fibroblast", "RSPO3+", "WNT2B+", "Endothelial", "Endothelial", "Mt-Hi_stromal", "Pericytes", "Glia", "Myofibroblasts", "Endothelial", "Endothelial")
 names(new.idents) <- levels(stromal)
 stromal=RenameIdents(stromal,new.idents)
 DimPlot(stromal, label=T)
@@ -132,7 +118,7 @@ keeping.order <- function(data, fn, ...) {
   out 
 } 
 CellsMeta<-keeping.order(CellsMeta, merge, y=x, by = "NAME", all=T)
-CellsMeta<-CellsMeta[,c(1,30)]
+CellsMeta<-CellsMeta[,c(1,29)]
 rownames(CellsMeta)<-CellsMeta$NAME
 data<-AddMetaData(data, CellsMeta)
 Idents(data)=data$celltypes
@@ -172,9 +158,9 @@ DefaultAssay(data)<-"integrated"
 data <- RunUMAP(data, dims = 1:30)
 data <-FindNeighbors(data, dims = 1:30)
 data<-FindClusters(data, resolution = 0.4)
-
+dim(data)
 Idents(data)=data$celltypes
-DimPlot(data, label = T, repel = T, order = c("MAIT", "Absorptive_enterocyte", "IgA_plasma", "WNT5B+", "Aborptive_TA")) + NoLegend()
+DimPlot(data, label = T, repel = T, order = c("MAIT","WNT2B+", "Absorptive_enterocyte", "IgA_plasma", "WNT5B+", "Aborptive_TA")) + NoLegend()
 
 ggsave("dimplot_data2march2021.pdf", height=15, width=15)
 
