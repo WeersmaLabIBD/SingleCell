@@ -40,7 +40,41 @@ write.csv(UCNI_cellularmarkers, "Results/DE/UCNI_cellularmarkers.csv")
 HCNI_cellularmarkers<-FindAllMarkers(HC_NI,test.use = "MAST", only.pos = T )
 write.csv(HCNI_cellularmarkers, "Results/DE/HCNI_cellularmarkers.csv")
 
-##
+#####
+# epithelial markers
+data@meta.data$cell_cat<-"other"
+
+data@meta.data$cell_cat[data@meta.data$celltypes == "Immature_enterocyte"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "Cycling_TA"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "Absorptive_enterocyte"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "Ribo_TA"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "Stem"]<-"epithelial"
+
+data@meta.data$cell_cat[data@meta.data$celltypes == "Immature_goblet"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "BEST4_enterocyte"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "DUOX2_enterocyte"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "PLCG2_TA"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "Absorptive_TA"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "Tuft"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "REG_TA"]<-"epithelial"
+data@meta.data$cell_cat[data@meta.data$celltypes == "Enteroendocrine"]<-"epithelial"
+
+data@meta.data$cell_cat[data@meta.data$celltypes == "Goblet"]<-"epithelial"
+
+Idents(data)<-"cell_cat"
+markers_epi_UCI_NI<-FindMarkers(data, subset.ident = "epithelial", group.by="state", test.use = "MAST", ident.1 = "UC-I", ident.2 = "UC-NI")
+markers_epi_PSCI_NI<-FindMarkers(data, subset.ident = "epithelial", group.by="state", test.use = "MAST", ident.1 = "PSC-I", ident.2 = "PSC-NI")
+markers_epi_UCNI_HC<-FindMarkers(data, subset.ident = "epithelial", group.by="state", test.use = "MAST", ident.1 = "UC-NI", ident.2 = "HC-NI")
+markers_epi_PSCNI_HC<-FindMarkers(data, subset.ident = "epithelial", group.by="state", test.use = "MAST", ident.1 = "PSC-NI", ident.2 = "HC-NI")
+
+write.csv(markers_epi_UCI_NI, "Results/DE/epithelium_ucI_vs_ucNI.csv")
+write.csv(markers_epi_PSCI_NI, "Results/DE/epithelium_pscI_vs_pscNI.csv")
+write.csv(markers_epi_UCNI_HC, "Results/DE/epithelium_ucNI_vs_HC.csv")
+write.csv(markers_epi_PSCNI_HC, "Results/DE/epithelium_pscNI_vs_HC.csv")
+
+
+
+
 
 # Inflamed vs Non-Inflamed
 Idents(data) <- "inflammation"
