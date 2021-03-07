@@ -27,11 +27,17 @@ write.csv(I_cellularmarkers, "Results/DE/I_cellularmarkers.csv")
 NI_cellularmarkers<-FindAllMarkers(data,subset.ident = "NI", group.by = "celltypes",test.use = "MAST", only.pos = T )
 write.csv(NI_cellularmarkers, "Results/DE/NI_cellularmarkers.csv")
 Idents(data)<-"state"
-PSCNI_cellularmarkers<-FindAllMarkers(data,subset.ident = "PSC-NI", group.by = "celltypes",test.use = "MAST", only.pos = T )
+PSC_NI<-subset(data, ident = "PSC-NI")
+UC_NI<-subset(data, ident="UC-NI")
+HC_NI<-subset(data, ident="HC-NI")
+Idents(PSC_NI)<-"celltypes"
+Idents(UC_NI)<-"celltypes"
+Idents(HC_NI)<-"celltypes"
+PSCNI_cellularmarkers<-FindAllMarkers(PSC_NI, test.use = "MAST", only.pos = T )
 write.csv(PSCNI_cellularmarkers, "Results/DE/PSCNI_cellularmarkers.csv")
-UCNI_cellularmarkers<-FindAllMarkers(data,subset.ident = "UC-NI", group.by = "celltypes",test.use = "MAST", only.pos = T )
+UCNI_cellularmarkers<-FindAllMarkers(UC_NI,test.use = "MAST", only.pos = T )
 write.csv(UCNI_cellularmarkers, "Results/DE/UCNI_cellularmarkers.csv")
-HCNI_cellularmarkers<-FindAllMarkers(data,subset.ident = "HC-NI", group.by = "celltypes",test.use = "MAST", only.pos = T )
+HCNI_cellularmarkers<-FindAllMarkers(HC_NI,test.use = "MAST", only.pos = T )
 write.csv(HCNI_cellularmarkers, "Results/DE/HCNI_cellularmarkers.csv")
 
 ##
