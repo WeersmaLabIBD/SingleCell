@@ -233,6 +233,110 @@ write.csv(NIup_Activated_B, "Results/DE/NIup_Activated_B.csv")
 
 ##########
 
+########### novel immune cell types
+#infl_vs_nINf
+
+Idents(data)<-"celltypes"
+
+Inflammation_Activated_cycling_B <- FindMarkers(data, subset.ident = "Activated_cycling_B", group.by = "inflammation", test.use = "MAST", ident.1 = "I", ident.2 = "NI")
+Inflammation_Activated_cycling_B <- filter(Inflammation_Activated_cycling_B, Inflammation_Activated_cycling_B$p_val_adj < 0.05)
+Inflammation_Activated_cycling_B$cluster = ifelse(Inflammation_Activated_cycling_B$avg_logFC > 0,"I","NI")
+Inflammation_Activated_cycling_B$gene = rownames(Inflammation_Activated_cycling_B)
+Iup_Activated_cycling_B = filter(Inflammation_Activated_cycling_B, Inflammation_Activated_cycling_B$cluster == "I")
+NIup_Activated_cycling_B = filter(Inflammation_Activated_cycling_B, Inflammation_Activated_cycling_B$cluster == "NI")
+write.csv(Iup_Activated_cycling_B, "Results/DE/Iup_Activated_cycling_B.csv")
+write.csv(NIup_Activated_cycling_B, "Results/DE/NIup_Activated_cycling_B.csv")
+
+#IBD_vs_HC
+Disease_Activated_cycling_B <- FindMarkers(data, subset.ident = "Activated_cycling_B", group.by = "disease", test.use = "MAST", ident.1 = c("UC", "PSC"), ident.2 = "HC")
+Disease_Activated_cycling_B <- filter(Disease_Activated_cycling_B, Disease_Activated_cycling_B$p_val_adj < 0.05)
+Disease_Activated_cycling_B$cluster = ifelse(Disease_Activated_cycling_B$avg_logFC > 0,"IBD","HC")
+Disease_Activated_cycling_B$gene = rownames(Disease_Activated_cycling_B)
+IBDup_Activated_cycling_B = filter(Disease_Activated_cycling_B, Disease_Activated_cycling_B$cluster == "IBD")
+HCup_Activated_cycling_B = filter(Disease_Activated_cycling_B, Disease_Activated_cycling_B$cluster == "HC")
+write.csv(IBDup_Activated_cycling_B, "Results/DE/IBDup_Activated_cycling_B.csv")
+write.csv(HCup_Activated_cycling_B, "Results/DE/HCup_Activated_cycling_B.csv")
+
+## PSC vs non PSC
+
+PSC_Activated_cycling_B <- FindMarkers(data, subset.ident = "Activated_cycling_B", group.by = "disease", test.use = "MAST", ident.1 = c("UC", "HC"), ident.2 = "PSC")
+PSC_Activated_cycling_B <- filter(PSC_Activated_cycling_B, PSC_Activated_cycling_B$p_val_adj < 0.05)
+PSC_Activated_cycling_B$cluster = ifelse(PSC_Activated_cycling_B$avg_logFC > 0,"non-PSC","PSC")
+PSC_Activated_cycling_B$gene = rownames(PSC_Activated_cycling_B)
+nonPSCup_Activated_cycling_B = filter(PSC_Activated_cycling_B, PSC_Activated_cycling_B$cluster == "non-PSC")
+PSCup_Activated_cycling_B = filter(PSC_Activated_cycling_B, PSC_Activated_cycling_B$cluster == "PSC")
+write.csv(nonPSCup_Activated_cycling_B, "Results/DE/nonPSCup_Activated_cycling_B.csv")
+write.csv(PSCup_Activated_cycling_B, "Results/DE/PSCup_Activated_cycling_B.csv")
+
+## paired_PSC
+PSCINI_Activated_cycling_B <- FindMarkers(data_PSC, subset.ident = "Activated_cycling_B", group.by = "inflammation", test.use = "MAST", ident.1 = "I", ident.2 = "NI")
+PSCINI_Activated_cycling_B <- filter(PSCINI_Activated_cycling_B, PSCINI_Activated_cycling_B$p_val_adj < 0.05)
+PSCINI_Activated_cycling_B$cluster = ifelse(PSCINI_Activated_cycling_B$avg_logFC > 0,"I","NI")
+PSCINI_Activated_cycling_B$gene = rownames(PSCINI_Activated_cycling_B)
+PSCIup_Activated_cycling_B = filter(PSCINI_Activated_cycling_B, PSCINI_Activated_cycling_B$cluster == "I")
+PSCNIup_Activated_cycling_B = filter(PSCINI_Activated_cycling_B, PSCINI_Activated_cycling_B$cluster == "NI")
+write.csv(PSCIup_Activated_cycling_B, "Results/DE/PSCIup_Activated_cycling_B.csv")
+write.csv(PSCNIup_Activated_cycling_B, "Results/DE/PSCNIup_Activated_cycling_B.csv")
+GO_PSCIup_Activated_cycling_B=enrichr(PSCIup_Activated_cycling_B$gene, databases = "GO_Biological_Process_2018")$GO_Biological_Process
+GO_PSCIup_Activated_cycling_B <- filter(GO_PSCIup_Activated_cycling_B, GO_PSCIup_Activated_cycling_B$Adjusted.P.value< 0.05)
+GO_PSCNIup_Activated_cycling_B=enrichr(PSCNIup_Activated_cycling_B$gene, databases = "GO_Biological_Process_2018")$GO_Biological_Process
+GO_PSCNIup_Activated_cycling_B <- filter(GO_PSCNIup_Activated_cycling_B, GO_PSCNIup_Activated_cycling_B$Adjusted.P.value< 0.05)
+write.csv(GO_PSCNIup_Activated_cycling_B, "Results/DE/GO_PSCNIup_Activated_cycling_B.csv")
+write.csv(GO_PSCIup_Activated_cycling_B, "Results/DE/GO_PSCIup_Activated_cycling_B.csv")
+
+#UCI_NI
+UCINI_Activated_cycling_B <- FindMarkers(data_UC, subset.ident = "Activated_cycling_B", group.by = "inflammation", test.use = "MAST", ident.1 = "I", ident.2 = "NI")
+UCINI_Activated_cycling_B <- filter(UCINI_Activated_cycling_B, UCINI_Activated_cycling_B$p_val_adj < 0.05)
+UCINI_Activated_cycling_B$cluster = ifelse(UCINI_Activated_cycling_B$avg_logFC > 0,"I","NI")
+UCINI_Activated_cycling_B$gene = rownames(UCINI_Activated_cycling_B)
+UCIup_Activated_cycling_B = filter(UCINI_Activated_cycling_B, UCINI_Activated_cycling_B$cluster == "I")
+UCNIup_Activated_cycling_B = filter(UCINI_Activated_cycling_B, UCINI_Activated_cycling_B$cluster == "NI")
+write.csv(UCIup_Activated_cycling_B, "Results/DE/UCIup_Activated_cycling_B.csv")
+write.csv(UCNIup_Activated_cycling_B, "Results/DE/UCNIup_Activated_cycling_B.csv")
+GO_UCIup_Activated_cycling_B=enrichr(UCIup_Activated_cycling_B$gene, databases = "GO_Biological_Process_2018")$GO_Biological_Process
+GO_UCIup_Activated_cycling_B <- filter(GO_UCIup_Activated_cycling_B, GO_UCIup_Activated_cycling_B$Adjusted.P.value< 0.05)
+GO_UCNIup_Activated_cycling_B=enrichr(UCNIup_Activated_cycling_B$gene, databases = "GO_Biological_Process_2018")$GO_Biological_Process
+GO_UCNIup_Activated_cycling_B <- filter(GO_UCNIup_Activated_cycling_B, GO_UCNIup_Activated_cycling_B$Adjusted.P.value< 0.05)
+write.csv(GO_UCNIup_Activated_cycling_B, "Results/DE/GO_UCNIup_Activated_cycling_B.csv")
+write.csv(GO_UCIup_Activated_cycling_B, "Results/DE/GO_UCIup_Activated_cycling_B.csv")
+
+#
+Disease2_Activated_cycling_B <- FindMarkers(data, subset.ident = "Activated_cycling_B", group.by = "state", test.use = "MAST", ident.1 = "UC-NI", ident.2 = "HC-NI")
+Disease2_Activated_cycling_B <- filter(Disease2_Activated_cycling_B, Disease2_Activated_cycling_B$p_val_adj < 0.05)
+Disease2_Activated_cycling_B$cluster = ifelse(Disease2_Activated_cycling_B$avg_logFC > 0,"UC-NI","HC-NI")
+Disease2_Activated_cycling_B$gene = rownames(Disease2_Activated_cycling_B)
+UC_NIup_Activated_cycling_B = filter(Disease2_Activated_cycling_B, Disease2_Activated_cycling_B$cluster == "UC-NI")
+HC_NIup_Activated_cycling_B = filter(Disease2_Activated_cycling_B, Disease2_Activated_cycling_B$cluster == "HC-NI")
+write.csv(UC_NIup_Activated_cycling_B, "Results/DE/UCNIupvsHC-NI_Activated_cycling_B.csv")
+write.csv(HC_NIup_Activated_cycling_B, "Results/DE/HC_NIupvsUCNI_Activated_cycling_B.csv")
+
+Disease1_Activated_cycling_B <- FindMarkers(data, subset.ident = "Activated_cycling_B", group.by = "state", test.use = "MAST", ident.1 = "PSC-NI", ident.2 = "HC-NI")
+Disease1_Activated_cycling_B <- filter(Disease1_Activated_cycling_B, Disease1_Activated_cycling_B$p_val_adj < 0.05)
+Disease1_Activated_cycling_B$cluster = ifelse(Disease1_Activated_cycling_B$avg_logFC > 0,"PSC-NI","HC-NI")
+Disease1_Activated_cycling_B$gene = rownames(Disease1_Activated_cycling_B)
+PSC_NIup_Activated_cycling_B = filter(Disease1_Activated_cycling_B, Disease1_Activated_cycling_B$cluster == "PSC-NI")
+HC_NIup_Activated_cycling_B = filter(Disease1_Activated_cycling_B, Disease1_Activated_cycling_B$cluster == "HC-NI")
+write.csv(PSC_NIup_Activated_cycling_B, "Results/DE/PSCNIupvsHC-NI_Activated_cycling_B.csv")
+write.csv(HC_NIup_Activated_cycling_B, "Results/DE/HC_NIupvsPSCNI_Activated_cycling_B.csv")
+
+Disease3_Activated_cycling_B <- FindMarkers(data, subset.ident = "Activated_cycling_B", group.by = "state", test.use = "MAST", ident.1 = "PSC-I", ident.2 = "HC-NI")
+Disease3_Activated_cycling_B <- filter(Disease3_Activated_cycling_B, Disease3_Activated_cycling_B$p_val_adj < 0.05)
+Disease3_Activated_cycling_B$cluster = ifelse(Disease3_Activated_cycling_B$avg_logFC > 0,"PSC-I","HC-NI")
+Disease3_Activated_cycling_B$gene = rownames(Disease3_Activated_cycling_B)
+PSC_Iup_Activated_cycling_B = filter(Disease3_Activated_cycling_B, Disease3_Activated_cycling_B$cluster == "PSC-I")
+HC_NIup_Activated_cycling_B = filter(Disease3_Activated_cycling_B, Disease3_Activated_cycling_B$cluster == "HC-NI")
+write.csv(PSC_Iup_Activated_cycling_B, "Results/DE/PSCIupvsHC-NI_Activated_cycling_B.csv")
+write.csv(HC_NIup_Activated_cycling_B, "Results/DE/HC_NIupvsPSCI_Activated_cycling_B.csv")
+
+Disease4_Activated_cycling_B <- FindMarkers(data, subset.ident = "Activated_cycling_B", group.by = "state", test.use = "MAST", ident.1 = "UC-I", ident.2 = "HC-NI")
+Disease4_Activated_cycling_B <- filter(Disease4_Activated_cycling_B, Disease4_Activated_cycling_B$p_val_adj < 0.05)
+Disease4_Activated_cycling_B$cluster = ifelse(Disease4_Activated_cycling_B$avg_logFC > 0,"UC-I","HC-NI")
+Disease4_Activated_cycling_B$gene = rownames(Disease4_Activated_cycling_B)
+UC_Iup_Activated_cycling_B = filter(Disease4_Activated_cycling_B, Disease4_Activated_cycling_B$cluster == "UC-I")
+HC_NIup_Activated_cycling_B = filter(Disease4_Activated_cycling_B, Disease4_Activated_cycling_B$cluster == "HC-NI")
+write.csv(UC_Iup_Activated_cycling_B, "Results/DE/UCIupvsHC-NI_Activated_cycling_B.csv")
+write.csv(HC_NIup_Activated_cycling_B, "Results/DE/HC_NIupvsUCI_Activated_cycling_B.csv")
+
 
 
 # IBD vs HC
