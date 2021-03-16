@@ -9,7 +9,7 @@ library(readxl)
 library(openxlsx)
 library(enrichR)
 
-data<- readRDS("Data/PSC_processed_march_2021.rds")
+data<- readRDS("Data/PSC_processed_march16_2021.rds")
 DefaultAssay(data) = "RNA"
 
 # Inflamed vs Non-Inflamed
