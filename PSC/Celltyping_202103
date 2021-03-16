@@ -58,7 +58,7 @@ DefaultAssay(leuko)<-"RNA"
 #markers_leuko <- FindAllMarkers(leuko, only.pos = TRUE, min.pct = 0.25)
 #selected_markers_leuko <- markers_leuko %>% group_by(cluster) %>% top_n(n = 3, wt = avg_logFC)
 # all B cells (CD19 and/or CD20), all T cells (CD3E, CD3D), non-T non-B is APC; Activated_B (CD74, CD83, FCRL5); MAIT (CCR7-, SELLlo, IL7R, CD4lo, KLRB1, CD44); Treg (TNFRSF4, CD4); Memory_CD4T (SELL, CCR7, CD4); Mt (mito); CD8pos (GNLY+/-, CD8A, NKG7) DC (CD1C, ITGAx, HLADRB1, STAT1); ; Cycling_T (TFRC+, CCL5, CD4lo, CD3); Mature_B (IGHD+/-, SELL, CD24, CD83+/-); Inflammatory_monocytes (OSM, S100A8, S100A9, ITGAX); Memory_B (CXCR5, TNFRSF13B, IGHD, POUZAF1lo); Cycling_B (CD74,AICDA, POUZAF1, ASF1B, CLSPN); Macrophages (CD14, HLADRB1); Cycling_T (CLSPN, GNLY, CD4)
-new.idents<-c("Activated_B", "MAIT", "Treg", "Memory_CD4T", "Mt","CD8T", "DC", "CD8T", "Cycling_T", "Mature_B", "Inflammatory_monocyte", "Mature_B", "Doublets", "Memory_B", "Mt", "Cycling_B", "Macrophage", "Cycling_T", "Doublets")
+new.idents<-c("Mature_B", "MAIT", "Treg", "Memory_CD4T", "Mt","CD8T", "DC", "CD8T", "Cycling_T", "Mature_B", "Inflammatory_monocyte", "Mature_B", "Doublets", "Activated_B", "Mt", "Activated_cycling_B", "Macrophage", "Cycling_T", "Doublets")
 names(new.idents) <- levels(leuko)
 leuko=RenameIdents(leuko,new.idents)
 DimPlot(leuko, label=T)
@@ -185,6 +185,6 @@ DimPlot(data, label = T, repel = T, order = c("MAIT","WNT2B+", "Absorptive_enter
 
 ggsave("dimplot_data2march2021.pdf", height=15, width=15)
 
-saveRDS(data, "Data/PSC_processed_march_2021.rds")
+saveRDS(data, "Data/PSC_processed_march16_2021.rds")
 
 # create figures and proceed to DE analysis
