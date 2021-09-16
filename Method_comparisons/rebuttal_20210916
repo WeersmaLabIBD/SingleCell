@@ -1,0 +1,164 @@
+#### script rebuttal methodspaper
+
+fresh_frozen@meta.data$Predicted_all_categories<-fresh_frozen@meta.data$Predicted_all
+
+fresh_frozen@meta.data$Predicted_all_categories[fresh_frozen@meta.data$Predicted_all == "Bcell"]<-"immune"
+fresh_frozen@meta.data$Predicted_all_categories[fresh_frozen@meta.data$Predicted_all == "Tcell"]<-"immune"
+fresh_frozen@meta.data$Predicted_all_categories[fresh_frozen@meta.data$Predicted_all == "myeloid"]<-"immune"
+fresh_frozen@meta.data$Predicted_all_categories[fresh_frozen@meta.data$Predicted_all == "Lymphoid"]<-"immune"
+
+fresh_frozen@meta.data$Predicted_all_categories[fresh_frozen@meta.data$Predicted_all == "endothelial"]<-"stromal"
+fresh_frozen@meta.data$Predicted_all_categories[fresh_frozen@meta.data$Predicted_all == "Glia"]<-"stromal"
+fresh_frozen@meta.data$Predicted_all_categories[fresh_frozen@meta.data$Predicted_all == "fibroblast"]<-"stromal"
+
+
+VlnPlot(fresh_frozen, group.by="Predicted_all_categories", features="percent.mt", split.by="preservation")
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_frozen_mito_cell_categories.png", width = 20, height = 20, dpi = 600)
+
+VlnPlot(data, group.by="Predicted_all_categories", features="percent.mt", split.by="method")
+
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_frozen_mito_cell_categories_noNA.png", width = 20, height = 20, dpi = 600)
+
+plot1 <- FeatureScatter(fresh_frozen, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="Predicted_all_categories")
+
+immune<-subset(fresh_frozen, subset=Predicted_all_categories=="immune")
+epithelium<-subset(fresh_frozen, subset=Predicted_all_categories=="epithelium")
+stromal<-subset(fresh_frozen, subset=Predicted_all_categories=="stromal")
+
+fresh<-subset(fresh_frozen, subset=preservation=="fresh")
+frozen<-subset(fresh_frozen, subset=preservation=="cryo")
+
+plot1 <- FeatureScatter(fresh, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,12000)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_nCountRNA_nGene_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+
+plot1 <- FeatureScatter(frozen, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,12000)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/frozen_nCountRNA_nGene_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+
+plot1 <- FeatureScatter(fresh, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,60)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_nCountRNA_percentMt_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+
+plot1 <- FeatureScatter(frozen, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,60)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/frozen_nCountRNA_percentMt_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+VlnPlot(frozen, feature="percent.mt", group.by="Predicted_all")
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/frozen_vpln_PercentMt_allcelltypes.pdf", width = 10, height = 10, dpi = 600)
+
+
+plot1 <- FeatureScatter(immune, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="preservation", pt.size=1)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_frozen_nCountRNA_PercentMt_immune.png", width = 20, height = 20, dpi = 600)
+
+plot1 <- FeatureScatter(stromal, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="preservation", pt.size=1)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_frozen_nCountRNA_PercentMt_stromal.png", width = 20, height = 20, dpi = 600)
+
+plot1 <- FeatureScatter(epithelium, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="preservation", pt.size=1)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_frozen_nCountRNA_PercentMt_epithelium.png", width = 20, height = 20, dpi = 600)
+
+plot2 <- FeatureScatter(immune, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", group.by="preservation", pt.size=1)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_frozen_nCountRNA_nFeature_immune.png", width = 20, height = 20, dpi = 600)
+
+plot2 <- FeatureScatter(stromal, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", group.by="preservation", pt.size=1)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_frozen_nCountRNA_nFeature_stromal.png", width = 20, height = 20, dpi = 600)
+
+plot2 <- FeatureScatter(epithelium, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", group.by="preservation", pt.size=1)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/fresh_frozen_nCountRNA_nFeature_epithelium.png", width = 20, height = 20, dpi = 600)
+
+sanger<-subset..
+
+
+
+#####
+wholecollagenase<-subset(methodspaper, subset=method=="wholecollagenase")
+splitcollagenase<-subset(methodspaper, subset=method=="splitcollagenase")
+splitprotease<-subset(methodspaper, subset=method=="splitprotease")
+splitprotease_epi<-subset(methodspaper, subset=method=="splitprotease_epi")
+
+plot1 <- FeatureScatter(wholecollagenase, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,12000)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/wholecollagenase_nCountRNA_nGene_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+plot1 <- FeatureScatter(wholecollagenase, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,60)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/wholecollagenase_nCountRNA_percentMt_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+plot1 <- FeatureScatter(splitcollagenase, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,12000)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/splitcollagenase_nCountRNA_nGene_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+plot1 <- FeatureScatter(splitcollagenase, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,60)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/splitcollagenase_nCountRNA_percentMt_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+
+plot1 <- FeatureScatter(splitprotease, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,12000)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/splitprotease_nCountRNA_nGene_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+plot1 <- FeatureScatter(splitprotease, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,60)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/splitprotease_nCountRNA_percentMt_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+plot1 <- FeatureScatter(splitprotease_epi, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,12000)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/splitprotease_epi_nCountRNA_nGene_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+plot1 <- FeatureScatter(splitprotease_epi, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by="Predicted_all_categories", pt.size=1)+xlim(-1,(3*10^5))+ylim(-1,60)
+ggsave("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/splitprotease_epi_nCountRNA_percentMt_celltypes.pdf", width = 10, height = 10, dpi = 600)
+
+
+####
+#calculate genes expressed i 10% cells
+lp<-subset(smillie, subset=Location=="LP")
+dim(lp)
+epi<-subset(smillie, subset=Location=="Epi")
+dim(epi)
+x<-CreateSeuratObject(counts =lp@assays$RNA@counts, min.cells=262)
+dim(x)
+y<-CreateSeuratObject(counts =epi@assays$RNA@counts, min.cells=267)
+dim(y)
+genes_fresh<-rownames(x@assays$RNA@counts)
+head(genes_fresh)
+genes_fresh<-data.frame(rownames(x@assays$RNA@counts))
+genes_frozen<-data.frame(rownames(y@assays$RNA@counts))
+head(genes_fresh)
+colnames(genes_fresh)[1]<-"Gene"
+colnames(genes_frozen)[1]<-"Gene"
+z<-merge(genes_fresh,genes_frozen, by="Gene", all=T)
+dim(z)
+
+
+###### selecting PCs
+
+methodspaper<-readRDS("/groups/umcg-weersma/tmp01/singelcell/Methodspaper/Processed_data/SCT_100smillie_noNA.rds")
+smillie<-subset(methodspaper, subset=Predicted_all=="epithelium")
+smillie<-subset(smillie, subset=method=="splitcollagenase")
+
+DefaultAssay(smillie)<-"RNA"
+Idents(smillie)<-"Location"
+smillie<-subset(smillie, downsample=2671)
+smillie <- NormalizeData(smillie)
+all.genes <- rownames(smillie)
+smillie <- ScaleData(smillie, features = all.genes)
+smillie <- RunPCA(smillie, features = all.genes)
+#DimPlot(smillie, reduction = "pca")
+#DimPlot(smillie, reduction = "pca", group.by="Location")
+#ggsave("Methodspaper/PCA1_2_smillie_epi.png", width = 8, height = 8, dpi = 600)
+DE_epi<-FindMarkers(smillie, test.use="MAST", ident.1="epi", ident.2="lp", 	)
+
+###
+#patient specific DE fresh_frozen (not done yet)
+
+sanger<-subset(fresh_frozen,subset=orig.ident=="Sanger")
+takeda<-subset(fresh_frozen,subset=orig.ident=="Takeda")
+
+Tcells<-subset(sanger, subset = Predicted_all == "Tcell")
+Bcells<-subset(sanger, subset = Predicted_all == "Bcell")
+Fibroblasts<-subset(sanger, subset = Predicted_all == "fibroblast")
+Myeloid<-subset(sanger, subset = Predicted_all == "myeloid")
+Epithelium<-subset(sanger, subset = Predicted_all == "epithelium")
+Endothelial<-subset(sanger, subset = Predicted_all == "endothelial")
+Lymphoid<-subset(sanger, subset = Predicted_all == "Lymphoid")
+Glia<-subset(sanger, subset = Predicted_all == "Glia")
+
+Tcell_fresh_frozen_sanger<-FindMarkers(Tcells, test.use="MAST", ident.1="fresh", ident.2="cryo")
+write.csv(Tcell_fresh_frozen_sanger, "/groups/umcg-weersma/tmp01/singelcell/Methodspaper/Tcell_fresh_frozen_sanger.csv")
+
+
+
+
+
