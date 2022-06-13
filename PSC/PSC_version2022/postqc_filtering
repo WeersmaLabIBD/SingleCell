@@ -1,0 +1,34 @@
+###########################
+# Post-qc filtering       #  
+# and processing          #
+###########################
+
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(readr)
+library(tidyr)
+library(MAST)
+library(readxl)
+library(openxlsx)
+
+data<- readRDS("Data/PSC_202002_integrated_v2_noribo.rds")
+data=UpdateSeuratObject(data)
+DimPlot(data, label = T) + NoLegend()
+DefaultAssay(data) = "RNA"
+
+table(data@meta.data$Final_HTO)
+data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-I-3019"]<-"PSC-NI-XXXX"
+data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-NI-3019"]<-"PSC-I-XXXX"
+table(data@meta.data$Final_HTO)
+data@meta.data$disease = sapply(strsplit(data$Final_HTO,"-"), `[`, 1)
+data@meta.data$inflammation = sapply(strsplit(data$Final_HTO,"-"), `[`, 2)
+data@meta.data$sample = sapply(strsplit(data$Final_HTO,"-"), `[`, 3)
+data@meta.data$state <- paste(data$disease, data$inflammation, sep='-')
+table(data@meta.data$sample)
+data = subset(data, subset = sample != "3296")
+table(data@meta.data$sample)
+DimPlot(data, label = T) + NoLegend()
+
+saveRDS(data, "Data/PSC_2022_integrated_postqc_filtered.rds")
