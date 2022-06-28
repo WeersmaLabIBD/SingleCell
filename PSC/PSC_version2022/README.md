@@ -10,8 +10,4 @@ This folder contains code and information on the processing and analysis of data
 
 
 Further analyses:
-1. Proportion_analyses.R was used for differential abundance analysis
-2. DE_analysis.R was used to identify differentially expressed genes for several comparisons, and GO terms associated
-3. DE_analysis_final_hopelijk.R was used to identify differentially expressed genes, but corrected for number of cells using permutation analysis
-4. Cellchat.R was used to perform cell-cell interaction analysis (https://github.com/sqjin/CellChat). This was done on a subset of cells for efficiency.
-5. riskgene_expression_analysis.R was used to assess PSC and UC risk genes differentially expressed in different health and disease states, for each of the different cell types
+1. DE_loop.R can be used to generate DE genes and enriched GO processes
