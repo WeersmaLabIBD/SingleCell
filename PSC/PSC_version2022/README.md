@@ -5,8 +5,7 @@ This folder contains code and information on the processing and analysis of data
 3. Each 10x lane was preprocessed (HTO demultiplexing, souporcell demultiplexing, QC filtering, SCtransformation) seperately following preprocess.R
 4. Lanes were integrated into one set using SCT_integration_noribo_v2.R following standardized Seurat SCT integration workflow (https://satijalab.org/seurat/v3.0/integration.html)
 5. Post-qc filtering of samples was done following postqc_filtering.R
-6. Doublet removal was done using Scrublet following XXXX
-7. Celltype annotation was done using Azimuth following XXX
+6. Celltype annotation was done using Azimuth following XXX
 
 
 Further analyses:
