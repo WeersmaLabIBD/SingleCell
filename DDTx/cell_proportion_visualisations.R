@@ -279,4 +279,60 @@ a$pt_tp_dr<-paste(y_r$sample, y_r$timepoint, y_r$donor_recipient, sep="_")
 ggplot(a, aes(x=my_order,y=ACR_prop, fill=variable))+
   geom_bar(position = position_dodge(), stat="identity", color="black") + theme_bw()
 
+#### area plots for visualisation of compositional changes over time - NOTE: time points with zero recipient cells excluded from recipient plots to improve visibility
 
+ggplot(y_pt1_d, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+ggplot(y_pt2_d, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+ggplot(y_pt3_d, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+
+ggplot(y_pt1_r, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+z<-y_pt1_r[y_pt1_r$timepoint != c(47,121),]
+ggplot(z, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+ggplot(y_pt2_r, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+z<-y_pt2_r[y_pt2_r$timepoint != 12,]
+ggplot(z, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+
+ggplot(y_pt3_r, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+ggplot(y_pt3_r, aes(x=ACR_grade,y=value, fill=variable))+
+  geom_bar(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+
+ggplot(x_pt1_d, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+ggplot(x_pt2_d, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+ggplot(x_pt3_d, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+
+ggplot(x_pt1_r, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+z<-x_pt1_r[x_pt1_r$timepoint != c(47,121),]
+ggplot(z, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+ggplot(x_pt2_r, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+z<-x_pt2_r[x_pt2_r$timepoint != 12,]
+ggplot(z, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
+
+
+ggplot(x_pt3_r, aes(x=timepoint,value, fill=variable))+
+  geom_area(position=position_stack(), stat="identity", color="black") + theme_bw()
