@@ -27,4 +27,4 @@ data_2 <- subset(data, patient_compartment != "UMCGDDtx00003r_epithelial" & pati
 unique(data_2@meta.data$patient_compartment)
 
 # save
-saveRDS(data_2, "source/ddtx_merged_demultiplexed_clustered_compartment_azi_elmentaiteadultileum_below60pctmito_withoutEpithelialR.rds")
+saveRDS(data_2, "/source/ddtx_merged_demultiplexed_clustered_compartment_azi_elmentaiteadultileum_below60pctmito_withoutEpithelialR.rds")
