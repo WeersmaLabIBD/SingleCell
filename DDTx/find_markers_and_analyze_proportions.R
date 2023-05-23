@@ -29,3 +29,37 @@ library(Seurat)
 Idents(data)<-"sample"
 data_1949<-subset(data, downsample=1949)
 saveRDS(data_1949, "DDTX_sample_1949cells.rds")
+
+#generate CD4 T subsets
+
+## find subsets T cells
+Idents(data)<-"predicted.celltype.elmentaiteadultileum"
+cd4T<-subset(data,idents="Activated CD4 T")
+DimPlot(cd4T)
+ggsave("cd4T_before_reclustering.png", width = 5, height = 5, dpi = 600)
+
+DefaultAssay(object = cd4T) <- "RNA"
+cd4T <- NormalizeData(cd4T, normalization.method = "LogNormalize", scale.factor = 10000)
+cd4T <- NormalizeData(cd4T)
+cd4T <- FindVariableFeatures(cd4T, selection.method = "vst", nfeatures = 2000)
+
+# Identify the 10 most highly variable genes
+top10 <- head(VariableFeatures(cd4T), 10)
+all.genes <- rownames(cd4T)
+cd4T <- ScaleData(cd4T, features = all.genes)
+cd4T <- RunPCA(cd4T, features = VariableFeatures(object = cd4T))
+ElbowPlot(cd4T)
+ggsave("Elbowplot_cd4T_after_reclustering.png", width = 5, height = 5, dpi = 600)
+
+cd4T <- FindNeighbors(cd4T, dims = 1:10)
+cd4T <- FindClusters(cd4T, resolution = 0.4)
+head(Idents(cd4T), 5)
+cd4T <- RunUMAP(cd4T, dims = 1:10)
+DimPlot(cd4T, reduction = "umap")
+ggsave("cd4T_after_reclustering.png", width = 5, height = 5, dpi = 600)
+markers_cd4T <- FindAllMarkers(cd4T, only.pos = TRUE, min.pct = 0.25)
+write.csv(markers_cd4T, "markers_cd4T_mito_epi_filtered_data.csv")
+FeaturePlot(cd4T, c("IL17F", "IL17A"))
+ggsave("cd4T_after_reclustering_il17.png", width = 5, height = 5, dpi = 600)
+
+# check markers on gutcellatlas
