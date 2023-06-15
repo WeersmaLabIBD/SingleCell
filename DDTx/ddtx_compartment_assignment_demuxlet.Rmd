@@ -1,0 +1,220 @@
+---
+title: "ddtx_compartment_assignment_demuxlet"
+author: "adapted from Roy Oelen"
+date: "2023-06-16"
+output: html_document
+---
+
+```{r header, include=FALSE}
+############################################################################################################################
+# Authors: Roy Oelen
+# Name: ddtx_compartment_assignment.Rmd
+# Function: assign compartments to the cells
+############################################################################################################################
+```
+
+```{r libraries, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+####################
+# libraries        #
+####################
+
+# for the object containing meta and count data
+library(Seurat)
+# for plotting
+library(ggplot2)
+library(cowplot)
+
+```
+
+```{r functions, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+####################
+# Functions        #
+####################
+
+get_average_expression_per_group <- function(seurat_object, metadata_column, genes, use_sct=F){
+  # initialize the table
+  expression_table <- NULL
+  # check each group
+  for(group in unique(seurat_object@meta.data[[metadata_column]])){
+    # we won't do NA, obviously
+    if(!is.na(group)){
+      # subset to that group
+      seurat_object_group <- seurat_object[, !is.na(seurat_object@meta.data[[metadata_column]]) & seurat_object@meta.data[[metadata_column]] == group]
+      # put per gene in a list
+      exp_per_list <- list()
+      # check each gene
+      for(gene in genes){
+        # get the mean expression
+        mean_expression <- NULL
+        # depending on the assay
+        if(use_sct){
+          mean_expression <- mean(as.vector(unlist(seurat_object_group@assays$SCT@counts[gene, ])))
+        }
+        else{
+          mean_expression <- mean(as.vector(unlist(seurat_object_group@assays$RNA@data[gene, ])))
+        }
+        # put in the list
+        exp_per_list[[gene]] <- mean_expression
+      }
+      # turn into a row
+      exp_row <- data.frame(exp_per_list)
+      # add the group
+      exp_row[['group']] <- group
+      # set the correct order
+      exp_row <- exp_row[, c('group', genes)]
+      # add to the big matrix
+      if(is.null(expression_table)){
+        expression_table <- exp_row
+      }
+      else{
+        expression_table <- rbind(expression_table, exp_row)
+      }
+    }
+  }
+  return(expression_table)
+}
+
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+####################
+# Main Code        #
+####################
+
+# locations of the objects
+seurat_objects_loc <- '/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/'
+seurat_object_clustered_loc <- paste(seurat_objects_loc, 'ddtx_merged_demultiplexed_clustered_demuxlet.rds', sep = '')
+seurat_object_compartment_loc <- paste(seurat_objects_loc, 'ddtx_merged_demultiplexed_clustered_compartment_demuxlet.rds', sep = '')
+# location of the tables
+tables_loc <- '/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/cell-type-classification/marker_genes/tables/'
+
+```
+
+```{r read_object, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# read the object
+ddtx <- readRDS(seurat_object_clustered_loc)
+
+```
+
+```{r avg_cluster_expression, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# get the mean expression of marker genes per cluster
+avg_exp_cluster <- get_average_expression_per_group(ddtx, 'seurat_clusters', c('EPCAM', 'PTPRC', 'THY1', 'SOX10', 'MADCAM1', 'CD27'))
+# write this somewhere
+write.table(avg_exp_cluster, paste(tables_loc, 'cluster_mean_exp_markers.tsv', sep = ''), row.names = F, col.names = T)
+
+```
+
+```{r create_features_plots, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# switch to the RNA slot, that is the one we also used in previous studies for this
+DefaultAssay(ddtx) <- 'RNA'
+# create the features plots
+epcam_feature <- FeaturePlot(ddtx, reduction = 'umap', features = c('EPCAM'))
+cd45_feature <- FeaturePlot(ddtx, reduction = 'umap', features = c('PTPRC'))
+cd27_feature <- FeaturePlot(ddtx, reduction = 'umap', features = c('CD27'))
+thy1_feature <- FeaturePlot(ddtx, reduction = 'umap', features = c('THY1'))
+sox10_feature <- FeaturePlot(ddtx, reduction = 'umap', features = c('SOX10'))
+madcam1_feature <- FeaturePlot(ddtx, reduction = 'umap', features = c('MADCAM1'))
+
+```
+
+## marker gene features
+```{r show_features_plots, include=TRUE, fig.width=10, fig.height=10}
+knitr::opts_chunk$set(echo = FALSE)
+
+# show the features
+plot_grid(epcam_feature, cd45_feature, cd27_feature, thy1_feature, sox10_feature, madcam1_feature)
+
+```
+
+```{r positivity_assignment, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# set the positivity for the markers
+ddtx@meta.data$epcam_positive <- NA
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['EPCAM']] >= 1, 'group'], 'epcam_positive'] <- T
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['EPCAM']] < 1, 'group'], 'epcam_positive'] <- F
+ddtx@meta.data$cd45_positive <- NA
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['PTPRC']] >= 1, 'group'], 'cd45_positive'] <- T
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['PTPRC']] < 1, 'group'], 'cd45_positive'] <- F
+ddtx@meta.data$thy1_positive <- NA
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['THY1']] >= 0.5, 'group'], 'thy1_positive'] <- T
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['THY1']] < 0.5, 'group'], 'thy1_positive'] <- F
+ddtx@meta.data$sox10_positive <- NA
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['SOX10']] >= 0.5, 'group'], 'sox10_positive'] <- T
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['SOX10']] < 0.5, 'group'], 'sox10_positive'] <- F
+ddtx@meta.data$madcam1_positive <- NA
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['MADCAM1']] >= 0.2, 'group'], 'madcam1_positive'] <- T
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['MADCAM1']] < 0.2, 'group'], 'madcam1_positive'] <- F
+ddtx@meta.data$cd27_positive <- NA
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['CD27']] >= 0.3, 'group'], 'cd27_positive'] <- T
+ddtx@meta.data[ddtx@meta.data[['seurat_clusters']] %in% avg_exp_cluster[avg_exp_cluster[['CD27']] < 0.3, 'group'], 'cd27_positive'] <- F
+
+# and create the plots
+epcam_positive <- DimPlot(ddtx, reduction = 'umap', group.by = 'epcam_positive') + scale_color_manual(values = c('gray', 'red'))
+cd45_positive <- DimPlot(ddtx, reduction = 'umap', group.by = 'cd45_positive') + scale_color_manual(values = c('gray', 'red'))
+cd27_positive <- DimPlot(ddtx, reduction = 'umap', group.by = 'cd27_positive') + scale_color_manual(values = c('gray', 'red'))
+thy1_positive <- DimPlot(ddtx, reduction = 'umap', group.by = 'thy1_positive') + scale_color_manual(values = c('gray', 'red'))
+sox10_positive <- DimPlot(ddtx, reduction = 'umap', group.by = 'sox10_positive') + scale_color_manual(values = c('gray', 'red'))
+madcam1_positive <- DimPlot(ddtx, reduction = 'umap', group.by = 'madcam1_positive') + scale_color_manual(values = c('gray', 'red'))
+
+```
+
+### marker genes and the positive clusters
+```{r show_positivity, include=TRUE, fig.width=10, fig.height=30}
+knitr::opts_chunk$set(echo = FALSE)
+
+# view everything
+plot_grid(epcam_feature, epcam_positive,
+          cd45_feature, cd45_positive,
+          cd27_feature, cd27_positive,
+          thy1_feature, thy1_positive,
+          sox10_feature, sox10_positive,
+          madcam1_feature, madcam1_positive,
+          ncol = 2, nrow = 6)
+
+```
+
+```{r compartment_assignment, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# assign the compartment
+ddtx@meta.data$compartment <- 'none'
+ddtx@meta.data[ddtx@meta.data$epcam_positive == T, 'compartment'] <- 'epithelial'
+ddtx@meta.data[ddtx@meta.data$cd45_positive == T |
+                   ddtx@meta.data$cd27_positive == T, 'compartment'] <- 'immune'
+ddtx@meta.data[ddtx@meta.data$thy1_positive == T |
+                   ddtx@meta.data$sox10_positive == T |
+                   ddtx@meta.data$madcam1_positive == T, 'compartment'] <- 'stromal'
+
+```
+
+```{r create_compartment_plot, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# create the plot of the compartment assignment
+p_compartment <- DimPlot(ddtx, reduction = 'umap', group.by = 'compartment', label = FALSE, label.size = 3, repel = TRUE, raster = FALSE) + ggtitle('compartment')
+
+```
+
+### final compartment assignment
+
+```{r show_plots, include = TRUE, fig.width=10, fig.height=10}
+knitr::opts_chunk$set(echo = FALSE)
+
+p_compartment
+```
+
+```{r save, include=FALSE}
+# save the result
+saveRDS(ddtx, seurat_object_compartment_loc)
+```
