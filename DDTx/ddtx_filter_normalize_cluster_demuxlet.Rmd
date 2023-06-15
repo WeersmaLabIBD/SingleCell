@@ -1,0 +1,140 @@
+title: "ddtx_filter_normalize_cluster_demuxlet"
+author: "adapted from Roy Oelen"
+date: "2023-06-15"
+output: html_document
+---
+
+```{r header, include=FALSE}
+############################################################################################################################
+# Authors: Roy Oelen
+# Name: ddtx_filter_normalize_cluster.Rmd
+# Function: filter the object on doublets, normalize with SCT and cluster+UMAP
+############################################################################################################################
+```
+
+```{r libraries, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+####################
+# libraries        #
+####################
+
+# for the object containing meta and count data
+library(Seurat)
+# for plotting
+library(ggplot2)
+
+```
+
+```{r functions, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+####################
+# Functions        #
+####################
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+####################
+# Main Code        #
+####################
+
+# locations of the objects
+seurat_objects_loc <- '/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/'
+seurat_object_demultiplexed_loc <- paste(seurat_objects_loc, 'ddtx_merged_demultiplexed_demuxlet.rds', sep = '')
+seurat_object_clustered_loc <- paste(seurat_objects_loc, 'ddtx_merged_demultiplexed_clustered_demuxlet.rds', sep = '')
+
+```
+
+```{r read_object, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# read the object
+ddtx <- readRDS(seurat_object_demultiplexed_loc)
+
+```
+
+### before filtering
+```{r show_before_filter, include=TRUE, echo=TRUE}
+# show the number of cells before filtering
+ddtx
+```
+
+### filtering
+
+The individuals that were sequenced, received a gut transplant. This means that there should be expression data of both the receipiant and the donor, as such the number of clusters from Souporcell, is twice the number of individuals sequenced. The only exception here, is 220504_lane10. Here there no donors. When filtering for doublets, we as such use the 2*n clusters for all lanes but that one.
+
+```{r doublet_filter, include=FALSE}
+# filter on doublets
+ddtx <- ddtx[, (
+  ddtx@meta.data$lane %in% c(
+    '220504_lane01',
+    '220504_lane02',
+    '220504_lane03',
+    '220504_lane04',
+    '220504_lane05',
+    '220504_lane06',
+    '220504_lane07',
+    '220504_lane08',
+    '220504_lane09',
+    '220504_lane10'
+    ) &
+  ddtx@meta.data$DROPLET.TYPE == "SNG"
+  )]
+```
+
+### after filtering
+```{r show_after_filter, include=TRUE, echo=TRUE}
+# show the number of cells after filtering
+ddtx
+```
+
+```{r normalize_rna, include=FALSE}
+# do old-style normalization
+ddtx <- NormalizeData(ddtx)
+```
+
+```{r normalize_sct, include=FALSE}
+# do SCT normalization
+ddtx <- SCTransform(ddtx)
+```
+
+```{r pca_umap_cluster, include=FALSE}
+# set the seed for reproduceability
+set.seed(7777)
+# do PCA dimensional reduction
+ddtx <- RunPCA(ddtx)
+# do 2d UMAP dimensional reduction
+ddtx <- RunUMAP(ddtx, dims = 1:30, return.model = T)
+# create neighbourhood graph
+ddtx <- FindNeighbors(ddtx, dims = 1:30, k.param = 20)
+# find clusters
+ddtx <- FindClusters(ddtx, resolution = 1.5)
+```
+
+```{r donors, include=FALSE}
+# add preliminary donor assignment
+ddtx@meta.data[['donor_final']] <- NA
+# we use the donor+receipiant for all lanes
+ddtx@meta.data[ddtx@meta.data$lane %in% c('220504_lane01', '220504_lane02', '220504_lane03', '220504_lane04', '220504_lane05', '220504_lane06', '220504_lane07', '220504_lane08',     '220504_lane09', '220504_lane10'), 'donor_final'] <- ddtx@meta.data[ddtx@meta.data$lane %in% c('220504_lane01', '220504_lane02', '220504_lane03', '220504_lane04', '220504_lane05', '220504_lane06', '220504_lane07', '220504_lane08', '220504_lane09', '220504_lane10'), 'SNG.BEST.GUESS']
+
+```
+
+```{r create_plots, include=FALSE}
+# plot the clusters
+p_clusters <- DimPlot(ddtx, reduction = 'umap', group.by = 'seurat_clusters', label = TRUE, label.size = 3, repel = TRUE, raster = FALSE) + NoLegend() + ggtitle('Leiden clusters')
+# plot the individuals
+p_individuals <- DimPlot(ddtx, reduction = 'umap', group.by = 'donor_final', label = FALSE, label.size = 3, repel = TRUE, raster = FALSE) + ggtitle('genotyped individuals')
+```
+
+### after 2d UMAP reduction and clustering
+
+```{r show_plots, include = TRUE, fig.width=10, fig.height=10}
+p_clusters
+p_individuals
+```
+
+```{r save, include=FALSE}
+# save the result
+saveRDS(ddtx, seurat_object_clustered_loc)
+```
