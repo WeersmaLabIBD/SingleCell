@@ -1,0 +1,130 @@
+title: "ddtx_azimuth_elmentaiteadultileum_classification_demuxlet"
+author: "adapted from Roy Oelen"
+date: "2023-06-15"
+output: html_document
+---
+
+```{r header, include=FALSE}
+############################################################################################################################
+# Authors: Roy Oelen
+# Name: ddtx_azimuth_elmentaiteadultileum_classification.Rmd
+# Function: assign compartments to the cells
+############################################################################################################################
+```
+
+```{r libraries, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+####################
+# libraries        #
+####################
+
+# for the object containing meta and count data
+library(Seurat)
+# for plotting
+library(ggplot2)
+library(cowplot)
+
+```
+
+```{r functions, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+####################
+# Functions        #
+####################
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+####################
+# Main Code        #
+####################
+
+# locations of the objects
+seurat_objects_loc <- '/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/'
+seurat_object_compartment_loc <- paste(seurat_objects_loc, 'ddtx_merged_demultiplexed_clustered_compartment_demuxlet.rds', sep = '')
+result_loc <- paste(seurat_objects_loc, 'ddtx_merged_demultiplexed_clustered_compartment_azi_elmentaiteadultileum_demuxlet.rds', sep = '')
+
+# location of reference
+references_loc <- '/groups/umcg-weersma/tmp01/datasets/elmentaite_2021/'
+reference_loc <- paste(references_loc, 'elmentaite_2021_all_sct_clus.rds', sep = '')
+
+```
+
+```{r read_objects, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+# read the objects
+ddtx <- readRDS(seurat_object_compartment_loc)
+elmentaite_full <- readRDS(reference_loc)
+
+```
+
+```{r process_reference, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# setting seed for reproduceability
+set.seed(7777)
+
+# subset the elmentaite object to adults and ileum
+elmentaite_adult_ileum <- elmentaite_full[, elmentaite_full@meta.data[['Region']] == 'SmallInt' & elmentaite_full@meta.data[['Diagnosis']] == 'Healthy adult']
+# do PCA dimensional reduction
+elmentaite_adult_ileum <- RunPCA(elmentaite_adult_ileum)
+# do 2d UMAP dimensional reduction
+elmentaite_adult_ileum <- RunUMAP(elmentaite_adult_ileum, dims = 1:30, return.model = T)
+# create neighbourhood graph
+elmentaite_adult_ileum <- FindNeighbors(elmentaite_adult_ileum, dims = 1:30, k.param = 20)
+# find clusters
+elmentaite_adult_ileum <- FindClusters(elmentaite_adult_ileum, resolution = 1.5)
+```
+
+```{r do_mapping, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# find transfer anchors
+anchors <- FindTransferAnchors(
+  reference = elmentaite_adult_ileum,
+  query = ddtx,
+  normalization.method = "SCT",
+  reference.reduction = "pca",
+  dims = 1:50
+)
+# do the reference mapping
+ddtx <- MapQuery(
+  anchorset = anchors,
+  query = ddtx,
+  reference = elmentaite_adult_ileum,
+  refdata = list(
+    celltype.elmentaiteadultileum = "cell_type"
+  ),
+  reference.reduction = "pca",
+  reduction.model = "umap"
+)
+
+```
+
+```{r create_plots, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# check the reference mapping
+reference_umap <- DimPlot(object = elmentaite_adult_ileum, reduction = "umap", group.by = "cell_type", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+# vs the prediction
+projected_umap <- DimPlot(object = ddtx, reduction = "ref.umap", group.by = "predicted.celltype.elmentaiteadultileum", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+# check the clusters
+clusters_umap <- DimPlot(object = ddtx, reduction = "umap", group.by = "seurat_clusters", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+# vs the predictions
+celltypes_umap <- DimPlot(object = ddtx, reduction = "umap", group.by = "predicted.celltype.elmentaiteadultileum", label = TRUE, label.size = 3, repel = TRUE) + NoLegend()
+
+```
+
+```{r show_plots, include = TRUE, fig.width=20, fig.height=20}
+knitr::opts_chunk$set(echo = FALSE)
+
+# show result
+plot_grid(reference_umap, projected_umap, clusters_umap, celltypes_umap)
+```
+
+```{r save, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+# save the result
+saveRDS(ddtx, result_loc)
+```
