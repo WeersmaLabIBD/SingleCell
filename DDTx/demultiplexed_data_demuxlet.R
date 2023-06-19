@@ -1,29 +1,84 @@
-lanes<-c("lane1", "lane2", "lane3", "lane4", "lane5", "lane6", "lane7", "lane8", "lane9", "lane10")
+## comparison demuxlet cell and doublet assignment results to souporcell results
+# WTC june 2023
 
-x<-NULL
-for(i in lanes){
+# prep demuxlet results for comparing to souporcell results
 
-y<-read.table(paste0("220504_", i, ".best"), header=T)
-y$barcode_lane = substr(y$BARCODE,1,nchar(y$BARCODE)-2)
-y$barcode_lane<-paste0(y$barcode_lane, "_220504_", i)
-y<-y[c(5,13,15,21)]
+lane1<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane01.best", header=T)
+lane1$barcode_lane = substr(lane1$BARCODE,1,nchar(lane1$BARCODE)-2)
+lane1$barcode_lane = substr(lane1$BARCODE,1,nchar(lane1$BARCODE)-2)
+lane1$barcode_lane<-paste0(lane1$barcode_lane, "_220504_lane01")
+
+lane2<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane02.best", header=T)
+lane2$barcode_lane = substr(lane2$BARCODE,1,nchar(lane2$BARCODE)-2)
+lane2$barcode_lane = substr(lane2$BARCODE,1,nchar(lane2$BARCODE)-2)
+lane2$barcode_lane<-paste0(lane2$barcode_lane, "_220504_lane02")
 
 
+lane3<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane03.best", header=T)
+lane3$barcode_lane = substr(lane3$BARCODE,1,nchar(lane3$BARCODE)-2)
+lane3$barcode_lane = substr(lane3$BARCODE,1,nchar(lane3$BARCODE)-2)
+lane3$barcode_lane<-paste0(lane3$barcode_lane, "_220504_lane03")
+
+lane4<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane04.best", header=T)
+lane4$barcode_lane = substr(lane4$BARCODE,1,nchar(lane4$BARCODE)-2)
+lane4$barcode_lane = substr(lane4$BARCODE,1,nchar(lane4$BARCODE)-2)
+lane4$barcode_lane<-paste0(lane4$barcode_lane, "_220504_lane04")
+
+lane5<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane05.best", header=T)
+lane5$barcode_lane = substr(lane5$BARCODE,1,nchar(lane5$BARCODE)-2)
+lane5$barcode_lane = substr(lane5$BARCODE,1,nchar(lane5$BARCODE)-2)
+lane5$barcode_lane<-paste0(lane5$barcode_lane, "_220504_lane05")
+
+lane6<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane06.best", header=T)
+lane6$barcode_lane = substr(lane6$BARCODE,1,nchar(lane6$BARCODE)-2)
+lane6$barcode_lane = substr(lane6$BARCODE,1,nchar(lane6$BARCODE)-2)
+lane6$barcode_lane<-paste0(lane6$barcode_lane, "_220504_lane06")
+
+lane7<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane07.best", header=T)
+lane7$barcode_lane = substr(lane7$BARCODE,1,nchar(lane7$BARCODE)-2)
+lane7$barcode_lane = substr(lane7$BARCODE,1,nchar(lane7$BARCODE)-2)
+lane7$barcode_lane<-paste0(lane7$barcode_lane, "_220504_lane07")
+
+lane8<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane08.best", header=T)
+lane8$barcode_lane = substr(lane8$BARCODE,1,nchar(lane8$BARCODE)-2)
+lane8$barcode_lane = substr(lane8$BARCODE,1,nchar(lane8$BARCODE)-2)
+lane8$barcode_lane<-paste0(lane8$barcode_lane, "_220504_lane08")
+
+lane9<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane09.best", header=T)
+lane9$barcode_lane = substr(lane9$BARCODE,1,nchar(lane9$BARCODE)-2)
+lane9$barcode_lane = substr(lane9$BARCODE,1,nchar(lane9$BARCODE)-2)
+lane9$barcode_lane<-paste0(lane9$barcode_lane, "_220504_lane09")
+
+lane10<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/demultiplexing/demuxlet/output/220504_lane10.best", header=T)
+lane10$barcode_lane = substr(lane10$BARCODE,1,nchar(lane10$BARCODE)-2)
+lane10$barcode_lane = substr(lane10$BARCODE,1,nchar(lane10$BARCODE)-2)
+lane10$barcode_lane<-paste0(lane10$barcode_lane, "_220504_lane10")
+
+x<-rbind(lane1, lane2)
+x<-rbind(x, lane3)
+x<-rbind(x, lane4)
+x<-rbind(x, lane5)
+x<-rbind(x, lane6)
+x<-rbind(x, lane7)
+x<-rbind(x, lane8)
+x<-rbind(x, lane9)
+x<-rbind(x, lane10)
+
+
+x<-x[c(5,13,15,21)]
+dim(x)
+
+# load mito, epi and mislabeled sample filtered souporcell results
 metadata<-read.table("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/ddtx_merged_demultiplexed_clustered_compartment_azi_elmentaiteadultileum_below60pctmito_epifilter_meta.csv")
+dim(metadata)
 
-merge<-merge(y, metadata, by="barcode_lane", all=F)
-
-table(y$SNG.BEST.GUESS, y$DROPLET.TYPE)
-table(metadata$donor_final, metadata$lane)
-
-
+## demuxlet assigned singlets largely overlap with souporcell assigned singlets 
+merge<-merge(x, metadata, by="barcode_lane", all=F)
+dim(merge)
 merge_single<-merge[merge$DROPLET.TYPE=="SNG",]
-table(y$SNG.BEST.GUESS, y$DROPLET.TYPE)
-table(merge_single$SNG.BEST.GUESS, merge_single$DROPLET.TYPE)
-table(merge_single$donor_final, merge_single$SNG.BEST.GUESS)
+table(merge_single$donor_final, merge_single$SNG.BEST.GUESS, merge_single$DROPLET.TYPE)
 
-x<-rbind(x, y)}
-
+#read demultiplexed Seuratobject, not doublet filtered
 data<-readDRS("/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/objects/ddtx_merged_demultiplexed.rds")
 
 #add demuxlet output to seuratfile
