@@ -62,4 +62,28 @@ write.csv(markers_cd4T, "markers_cd4T_mito_epi_filtered_data.csv")
 FeaturePlot(cd4T, c("IL17F", "IL17A"))
 ggsave("cd4T_after_reclustering_il17.png", width = 5, height = 5, dpi = 600)
 
+## markers for different timepoints epithelial cells in patient 3
+Idents(data)<-"compartment_final"
+epi<-subset(data, ident="Epithelial")
+Idents(epi)<-"patient"
+epi_pt3<-subset(epi, ident="UMCGDDtx00005")
+Idents(epi_pt3)<-"Timepoint_days"
+markers_epi_pt3<-FindAllMarkers(epi_pt3, only.pos=T) 
+write.csv(markers_epi_pt3, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_epi_pt3_timepoints.csv")
+
+epi_pt2<-subset(epi, ident="UMCGDDtx00004")
+Idents(epi_pt2)<-"Timepoint_days"
+markers_epi_pt2<-FindAllMarkers(epi_pt2, only.pos=T) 
+write.csv(markers_epi_pt2, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_epi_pt2_timepoints.csv")
+
+epi_pt1<-subset(epi, ident="UMCGDDtx00003")
+Idents(epi_pt1)<-"Timepoint_days"
+markers_epi_pt1<-FindAllMarkers(epi_pt1, only.pos=T) 
+write.csv(markers_epi_pt1, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_epi_pt1_timepoints.csv")
+
+
+
+
 # check markers on gutcellatlas
+
+
