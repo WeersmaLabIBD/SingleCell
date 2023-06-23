@@ -81,6 +81,26 @@ Idents(epi_pt1)<-"Timepoint_days"
 markers_epi_pt1<-FindAllMarkers(epi_pt1, only.pos=T) 
 write.csv(markers_epi_pt1, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_epi_pt1_timepoints.csv")
 
+## find endothelial markers
+Idents(data)<-"major_celltype"
+endo<-subset(data, ident="Endothelial")
+Idents(endo)<-"patient"
+endo_pt3<-subset(endo, ident="UMCGDDtx00005")
+Idents(endo_pt3)<-"Timepoint_days"
+markers_endo_pt3<-FindAllMarkers(endo_pt3, only.pos=T) 
+write.csv(markers_endo_pt3, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_endo_pt3_timepoints.csv")
+
+endo_pt2<-subset(endo, ident="UMCGDDtx00004")
+Idents(endo_pt2)<-"Timepoint_days"
+markers_endo_pt2<-FindAllMarkers(endo_pt2, only.pos=T) 
+write.csv(markers_endo_pt2, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_endo_pt2_timepoints.csv")
+
+endo_pt1<-subset(endo, ident="UMCGDDtx00003")
+Idents(endo_pt1)<-"Timepoint_days"
+markers_endo_pt1<-FindAllMarkers(endo_pt1, only.pos=T) 
+write.csv(markers_endo_pt1, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_endo_pt1_timepoints.csv")
+
+
 
 
 
