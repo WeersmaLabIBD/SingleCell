@@ -64,6 +64,25 @@ data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="St
 
 data@meta.data$patient_compartment <- paste(data@meta.data$donor_final,data@meta.data$compartment_final, sep="_")
 
+
+data@meta.data$major_celltype<- data@meta.data$compartment_final
+
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="Stromal 1 (ADAMDEC1+)"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="arterial capillary"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="Stromal 1 (CCL11+)"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="Stromal 2 (NPY+)"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="Mature venous EC"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="Contractile pericyte (PLN+)"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="Adult Glia"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="Mature arterial EC"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="Transitional Stromal 3 (C3+)"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="LEC3 (ADGRG3+)"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="LEC1 (ACKR4+)"),"major_celltype"]<-"Endothelial"
+data@meta.data[which(data@meta.data$predicted.celltype.elmentaiteadultileum=="Stromal 3 (C7+)"),"major_celltype"]<-"Endothelial"
+
+
+
+
 # subset the data
 unique(data@meta.data$patient_compartment)
 data_2 <- subset(data, patient_compartment != "UMCGDDtx00003r_Epithelial" & patient_compartment != "UMCGDDtx00004r_Epithelial" & patient_compartment !="UMCGDDtx00005r_Epithelial")
