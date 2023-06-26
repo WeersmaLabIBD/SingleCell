@@ -59,7 +59,7 @@ DimPlot(cd4T, reduction = "umap")
 ggsave("cd4T_after_reclustering.png", width = 5, height = 5, dpi = 600)
 markers_cd4T <- FindAllMarkers(cd4T, only.pos = TRUE, min.pct = 0.25)
 write.csv(markers_cd4T, "markers_cd4T_mito_epi_filtered_data.csv")
-FeaturePlot(cd4T, c("IL17F", "IL17A"))
+FeaturePlot(cd4T, c("IL17A"))
 ggsave("cd4T_after_reclustering_il17.png", width = 5, height = 5, dpi = 600)
 
 ## markers for different timepoints epithelial cells in patient 3
