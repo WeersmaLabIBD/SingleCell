@@ -62,7 +62,7 @@ write.csv(markers_cd4T, "markers_cd4T_mito_epi_filtered_data.csv")
 FeaturePlot(cd4T, c("IL17A"))
 ggsave("cd4T_after_reclustering_il17.png", width = 5, height = 5, dpi = 600)
 
-## markers for different timepoints epithelial cells in patient 3
+## markers for different timepoints epithelial cells in patient 1,2,3
 Idents(data)<-"compartment_final"
 epi<-subset(data, ident="Epithelial")
 Idents(epi)<-"patient"
@@ -99,6 +99,43 @@ endo_pt1<-subset(endo, ident="UMCGDDtx00003")
 Idents(endo_pt1)<-"Timepoint_days"
 markers_endo_pt1<-FindAllMarkers(endo_pt1, only.pos=T) 
 write.csv(markers_endo_pt1, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_endo_pt1_timepoints.csv")
+
+## find CD4T markers
+Idents(data)<-"predicted.celltype.elmentaiteadultileum"
+CD4<-subset(data, ident="Activated CD4 T")
+Idents(CD4)<-"patient"
+CD4_pt3<-subset(CD4, ident="UMCGDDtx00005")
+Idents(CD4_pt3)<-"Timepoint_days"
+markers_CD4_pt3<-FindAllMarkers(CD4_pt3, only.pos=T) 
+write.csv(markers_CD4_pt3, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_CD4_pt3_timepoints.csv")
+
+CD4_pt2<-subset(CD4, ident="UMCGDDtx00004")
+Idents(CD4_pt2)<-"Timepoint_days"
+markers_CD4_pt2<-FindAllMarkers(CD4_pt2, only.pos=T) 
+write.csv(markers_CD4_pt2, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_CD4_pt2_timepoints.csv")
+
+CD4_pt1<-subset(CD4, ident="UMCGDDtx00003")
+Idents(CD4_pt1)<-"Timepoint_days"
+markers_CD4_pt1<-FindAllMarkers(CD4_pt1, only.pos=T) 
+write.csv(markers_CD4_pt1, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_CD4_pt1_timepoints.csv")
+
+## find CD8T markers
+CD8<-subset(data, ident="Activated CD8 T")
+Idents(CD8)<-"patient"
+CD8_pt3<-subset(CD8, ident="UMCGDDtx00005")
+Idents(CD8_pt3)<-"Timepoint_days"
+markers_CD8_pt3<-FindAllMarkers(CD8_pt3, only.pos=T) 
+write.csv(markers_CD8_pt3, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_CD8_pt3_timepoints.csv")
+
+CD8_pt2<-subset(CD8, ident="UMCGDDtx00004")
+Idents(CD8_pt2)<-"Timepoint_days"
+markers_CD8_pt2<-FindAllMarkers(CD8_pt2, only.pos=T) 
+write.csv(markers_CD8_pt2, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_CD8_pt2_timepoints.csv")
+
+CD8_pt1<-subset(CD8, ident="UMCGDDtx00003")
+Idents(CD8_pt1)<-"Timepoint_days"
+markers_CD8_pt1<-FindAllMarkers(CD8_pt1, only.pos=T) 
+write.csv(markers_CD8_pt1, "/groups/umcg-weersma/tmp01/projects/ddtx/ongoing/seurat_preprocess_samples/DE/markers_CD8_pt1_timepoints.csv")
 
 
 
