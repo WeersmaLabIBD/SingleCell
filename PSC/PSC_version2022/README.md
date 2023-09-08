@@ -11,8 +11,9 @@ This folder contains code and information on the processing and analysis of data
 Further analyses:
 1. DE_loop.R can be used to generate DE genes and enriched GO processes
 
-DUOX2.R is gebruikt voor de DUOX2 analyse
-Figure1.R is gebruikt voor figuur 1. De stacked barplot.R ook.
-basicDE_2023.R is gebruikt voor figuur 3
-PSC_riskgenes.R is gebruikt voor figuur 4
-DE_analysis_2023 is gebaseerd op DE_loop.R en is gebruikt om de DE en GO tabellen te genereren
+Addition 2023:
+1. DUOX2.R is gebruikt voor de DUOX2 analyse
+2. Figure1.R is gebruikt voor figuur 1. De stacked barplot.R ook.
+3. basicDE_2023.R is gebruikt voor figuur 3
+4. PSC_riskgenes.R is gebruikt voor figuur 4
+5. DE_analysis_2023 is gebaseerd op DE_loop.R en is gebruikt om de DE en GO tabellen te genereren
