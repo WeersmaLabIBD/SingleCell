@@ -1,3 +1,5 @@
+#Script used for integration of lanes and normalisation
+
 library(Seurat)
 library(ggplot2)
 
