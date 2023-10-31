@@ -1,3 +1,5 @@
+#Script used for sample calling, qc and pre-integration prepping
+
 library(Seurat)
 library(patchwork)
 library(ggplot2)
