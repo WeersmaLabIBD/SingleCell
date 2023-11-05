@@ -19,15 +19,15 @@ DimPlot(data, label = T) + NoLegend()
 DefaultAssay(data) = "RNA"
 
 table(data@meta.data$Final_HTO)
-data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-I-3019"]<-"PSC-NI-XXXX"
-data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-NI-3019"]<-"PSC-I-XXXX"
+data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-I-X019"]<-"PSC-NI-XXXX"
+data@meta.data$Final_HTO[data@meta.data$Final_HTO == "PSC-NI-X019"]<-"PSC-I-XXXX"
 table(data@meta.data$Final_HTO)
 data@meta.data$disease = sapply(strsplit(data$Final_HTO,"-"), `[`, 1)
 data@meta.data$inflammation = sapply(strsplit(data$Final_HTO,"-"), `[`, 2)
 data@meta.data$sample = sapply(strsplit(data$Final_HTO,"-"), `[`, 3)
 data@meta.data$state <- paste(data$disease, data$inflammation, sep='-')
 table(data@meta.data$sample)
-data = subset(data, subset = sample != "3296")
+data = subset(data, subset = sample != "X296")
 table(data@meta.data$sample)
 DimPlot(data, label = T) + NoLegend()
 
