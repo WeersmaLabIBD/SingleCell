@@ -18,8 +18,8 @@ DefaultAssay(data) = "RNA"
 
 # Paired test PSC
 Idents(data) = "sample"
-data_PSC= subset(data, ident = c("3019","3069","3086","3147","3191","3317","3325"))
-data_UC= subset(data, ident = c("3006","3059","3076","3085","3107","3125","3249"))
+data_PSC= subset(data, ident = c("X019","X069","X086","X147","X191","X317","X325"))
+data_UC= subset(data, ident = c("X006","X059","X076","X085","X107","X125","X249"))
 Idents(data_PSC) = "inflammation"
 data_PSC_NI= subset(data_PSC, ident = "NI")
 data_PSC_I= subset(data_PSC, ident = "I")
